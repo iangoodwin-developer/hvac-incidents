@@ -5,6 +5,8 @@ import React, { useMemo } from 'react';
 import { Catalog, Incident } from '../types';
 import { PageHeader } from '../stylingComponents/PageHeader/PageHeader';
 import { IncidentChart } from '../stylingComponents/IncidentChart/IncidentChart';
+import { ConnectionBanner } from '../stylingComponents/ConnectionBanner/ConnectionBanner';
+import { StatusPill } from '../stylingComponents/StatusPill/StatusPill';
 import { ConnectionStatus } from './useIncidentSocket';
 
 // Utility helpers keep the rendering section focused on layout.
@@ -51,6 +53,8 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({ incident
         </nav>
       </PageHeader>
 
+      <ConnectionBanner status={connectionStatus} />
+
       {!incident || !detail ? (
         <p className='incident-detail__empty'>Incident not found.</p>
       ) : (
@@ -84,7 +88,9 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({ incident
               </div>
               <div className='incident-detail__item'>
                 <span className='incident-detail__label'>Status</span>
-                <span className='incident-detail__value'>{incident.stateId}</span>
+                <span className='incident-detail__value'>
+                  <StatusPill status={incident.stateId} />
+                </span>
               </div>
             </div>
           </section>

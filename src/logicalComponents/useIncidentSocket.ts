@@ -1,7 +1,7 @@
 // Custom hook that owns the WebSocket connection and exposes
 // a small API for the rest of the app to consume.
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { Catalog, Incident } from '../types';
 
 export type ConnectionStatus = 'connected' | 'disconnected';
@@ -21,9 +21,31 @@ type ServerPayload = {
   catalog?: Catalog;
 };
 
+type IncidentAction =
+  | { type: 'init'; incidents: Incident[] }
+  | { type: 'add'; incident: Incident }
+  | { type: 'update'; incident: Incident };
+
+// Reducer keeps the incident list transitions explicit and testable.
+const incidentsReducer = (state: Incident[], action: IncidentAction) => {
+  if (action.type === 'init') {
+    return action.incidents;
+  }
+
+  if (action.type === 'add') {
+    return [action.incident, ...state];
+  }
+
+  const exists = state.some(item => item.incidentId === action.incident.incidentId);
+  if (!exists) {
+    return [action.incident, ...state];
+  }
+  return state.map(item => (item.incidentId === action.incident.incidentId ? action.incident : item));
+};
+
 export const useIncidentSocket = () => {
   // Store incidents and catalog as reactive state so UI updates automatically.
-  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [incidents, dispatch] = useReducer(incidentsReducer, []);
   const [catalog, setCatalog] = useState<Catalog>(emptyCatalog);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const socketRef = useRef<WebSocket | null>(null);
@@ -58,7 +80,7 @@ export const useIncidentSocket = () => {
       if (payload.type === 'init') {
         // Initial payload carries the full catalog and current incident list.
         if (payload.incidents) {
-          setIncidents(payload.incidents);
+          dispatch({ type: 'init', incidents: payload.incidents });
         }
         if (payload.catalog) {
           // Merge with defaults to avoid undefined fields while server restarts.
@@ -75,7 +97,7 @@ export const useIncidentSocket = () => {
         if (!incident) {
           return;
         }
-        setIncidents(prev => [incident, ...prev]);
+        dispatch({ type: 'add', incident });
       }
 
       if (payload.type === 'incidentUpdated') {
@@ -84,13 +106,7 @@ export const useIncidentSocket = () => {
         if (!incident) {
           return;
         }
-        setIncidents(prev => {
-          const exists = prev.some(item => item.incidentId === incident.incidentId);
-          if (!exists) {
-            return [incident, ...prev];
-          }
-          return prev.map(item => (item.incidentId === incident.incidentId ? incident : item));
-        });
+        dispatch({ type: 'update', incident });
       }
     });
 
@@ -108,13 +124,7 @@ export const useIncidentSocket = () => {
 
   // Send a partial update (e.g., drag-and-drop state change) to the server.
   const updateIncident = (incident: Incident) => {
-    setIncidents(prev => {
-      const exists = prev.some(item => item.incidentId === incident.incidentId);
-      if (!exists) {
-        return [incident, ...prev];
-      }
-      return prev.map(item => (item.incidentId === incident.incidentId ? incident : item));
-    });
+    dispatch({ type: 'update', incident });
 
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       socketRef.current.send(JSON.stringify({ type: 'updateIncident', incident }));

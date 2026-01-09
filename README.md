@@ -28,7 +28,12 @@ Testing note:
 - The single unit test focuses on the incident bucketing/filter logic because it is pure business logic that directly affects which list items appear in, without coupling to UI rendering.
 
 Testing framework:
-- Create React App ships with Jest as the test runner (via `react-scripts test`), and we use `@types/jest` so TypeScript recognizes the Jest globals (`describe`, `it`, `expect`).
+- Create React App ships with Jest as the test runner (via `react-scripts test`), and we use React Testing Library for component-level tests.
+- `@types/jest` and `@testing-library/jest-dom` add TypeScript and DOM matchers (`describe`, `it`, `expect`, `toBeInTheDocument`).
+
+Routing note:
+- React Router v6/v7 introduces nested route trees (`Routes`/`Outlet`) and configuration-based routers (`createBrowserRouter` + `createRoutesFromElements`). It also encourages hoisting error boundaries to the route level.
+- For this interview demo we intentionally keep a hash-based router to avoid extra dependencies and server configuration: hash routing works entirely in the browser, so we do not need to install React Router or configure the dev/prod server to rewrite all paths back to `index.html`. That keeps the project lightweight while still letting us explain route parsing and view selection in plain React.
 
 How the server works:
 - The server is a small Node process using the `ws` WebSocket library.

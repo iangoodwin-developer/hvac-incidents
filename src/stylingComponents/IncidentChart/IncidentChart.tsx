@@ -9,7 +9,7 @@ type IncidentChartProps = {
 };
 
 // Calculate the latest value trend so we can color and label the UI.
-const getTrend = (readings: IncidentReading[]) => {
+const getTrend = (readings: IncidentReading[], key: 'temperature' | 'pressure') => {
   const last = readings[readings.length - 1];
   const previous = readings[readings.length - 2];
 
@@ -17,32 +17,33 @@ const getTrend = (readings: IncidentReading[]) => {
     return { label: 'N/A', symbol: '-', status: 'steady' as const };
   }
   if (!previous) {
-    return { label: `${last.temperature.toFixed(1)} F`, symbol: '-', status: 'steady' as const };
+    return { label: `${last[key].toFixed(1)}`, symbol: '-', status: 'steady' as const };
   }
 
-  const delta = last.temperature - previous.temperature;
+  const delta = last[key] - previous[key];
   if (delta > 0.2) {
-    return { label: `${last.temperature.toFixed(1)} F`, symbol: '^', status: 'rising' as const };
+    return { label: `${last[key].toFixed(1)}`, symbol: '^', status: 'rising' as const };
   }
   if (delta < -0.2) {
-    return { label: `${last.temperature.toFixed(1)} F`, symbol: 'v', status: 'falling' as const };
+    return { label: `${last[key].toFixed(1)}`, symbol: 'v', status: 'falling' as const };
   }
 
-  return { label: `${last.temperature.toFixed(1)} F`, symbol: '-', status: 'steady' as const };
+  return { label: `${last[key].toFixed(1)}`, symbol: '-', status: 'steady' as const };
 };
 
 export const IncidentChart: React.FC<IncidentChartProps> = ({ readings }) => {
   // Compute trend state once per render.
-  const trend = getTrend(readings);
+  const temperatureTrend = getTrend(readings, 'temperature');
+  const pressureTrend = getTrend(readings, 'pressure');
 
-  const bars = useMemo(() => {
+  const temperatureBars = useMemo(() => {
     // Normalize bar heights so the visual scale adjusts to the data range.
     if (readings.length === 0) {
       return [];
     }
-    const temperatures = readings.map(item => item.temperature);
-    const min = Math.min(...temperatures);
-    const max = Math.max(...temperatures);
+    const values = readings.map(item => item.temperature);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
     const range = Math.max(max - min, 1);
 
     return readings.map(item => ({
@@ -51,24 +52,69 @@ export const IncidentChart: React.FC<IncidentChartProps> = ({ readings }) => {
     }));
   }, [readings]);
 
+  const pressureBars = useMemo(() => {
+    if (readings.length === 0) {
+      return [];
+    }
+    const values = readings.map(item => item.pressure);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = Math.max(max - min, 1);
+
+    return readings.map(item => ({
+      id: item.timestamp,
+      height: ((item.pressure - min) / range) * 100
+    }));
+  }, [readings]);
+
   return (
     <section className='incident-chart'>
       <header className='incident-chart__header'>
-        <h3 className='incident-chart__title'>Live temperature</h3>
-        <div className='incident-chart__value'>
-          <span className={`incident-chart__value-number incident-chart__value-number--${trend.status}`}>
-            {trend.label}
-          </span>
-          <span className='incident-chart__value-arrow'>{trend.symbol}</span>
+        <div>
+          <h3 className='incident-chart__title'>Live readings</h3>
+          <p className='incident-chart__subtitle'>Temperature and pressure over time.</p>
+        </div>
+        <div className='incident-chart__values'>
+          <div className='incident-chart__value'>
+            <span className='incident-chart__value-label'>Temp</span>
+            <span className={`incident-chart__value-number incident-chart__value-number--${temperatureTrend.status}`}>
+              {temperatureTrend.label} F
+            </span>
+            <span className='incident-chart__value-arrow'>{temperatureTrend.symbol}</span>
+          </div>
+          <div className='incident-chart__value'>
+            <span className='incident-chart__value-label'>Pressure</span>
+            <span className={`incident-chart__value-number incident-chart__value-number--${pressureTrend.status}`}>
+              {pressureTrend.label} psi
+            </span>
+            <span className='incident-chart__value-arrow'>{pressureTrend.symbol}</span>
+          </div>
         </div>
       </header>
-      {bars.length === 0 ? (
+      {temperatureBars.length === 0 ? (
         <p className='incident-chart__empty'>No readings yet.</p>
       ) : (
-        <div className='incident-chart__bars'>
-          {bars.map(bar => (
-            <div key={bar.id} className='incident-chart__bar' style={{ height: `${bar.height}%` }} />
-          ))}
+        <div className='incident-chart__series'>
+          <div className='incident-chart__legend'>
+            <span className='incident-chart__legend-item'>
+              <span className='incident-chart__legend-swatch incident-chart__legend-swatch--temp' />
+              Temperature
+            </span>
+            <span className='incident-chart__legend-item'>
+              <span className='incident-chart__legend-swatch incident-chart__legend-swatch--pressure' />
+              Pressure
+            </span>
+          </div>
+          <div className='incident-chart__bars'>
+            {temperatureBars.map(bar => (
+              <div key={bar.id} className='incident-chart__bar incident-chart__bar--temp' style={{ height: `${bar.height}%` }} />
+            ))}
+          </div>
+          <div className='incident-chart__bars'>
+            {pressureBars.map(bar => (
+              <div key={bar.id} className='incident-chart__bar incident-chart__bar--pressure' style={{ height: `${bar.height}%` }} />
+            ))}
+          </div>
         </div>
       )}
       <p className='incident-chart__caption'>Updates stream in real time via WebSocket.</p>

@@ -6,6 +6,7 @@ import { Catalog, Incident } from '../types';
 import { INCIDENT_STATE_OPTIONS, INCIDENT_STATES, IncidentState } from '../constants';
 import { ConnectionStatus } from './useIncidentSocket';
 import { PageHeader } from '../stylingComponents/PageHeader/PageHeader';
+import { ConnectionBanner } from '../stylingComponents/ConnectionBanner/ConnectionBanner';
 
 const createEmptyForm = () => ({
   incidentId: '',
@@ -98,6 +99,8 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
           <a href='#/'>Back to incidents</a>
         </nav>
       </PageHeader>
+
+      <ConnectionBanner status={connectionStatus} />
 
       <main className='create-page__content'>
         <form onSubmit={submitIncident} className='create-page__form'>

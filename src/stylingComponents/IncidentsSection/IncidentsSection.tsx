@@ -1,8 +1,9 @@
 // Presentational list component that renders a table and drag targets.
 // It stays stateless by receiving handlers from the incidents page.
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Alarm, Asset, Incident, Site } from '../../types';
+import { StatusPill } from '../StatusPill/StatusPill';
 
 const formatTimestamp = (isoString: string) => {
   const date = new Date(isoString);
@@ -17,7 +18,67 @@ type IncidentsSectionProps = {
   alarms: Alarm[];
   onDropIncident: (incidentId: string) => void;
   onDragStart: (incidentId: string, event: React.DragEvent<HTMLTableRowElement>) => void;
+  onMoveIncident: (incidentId: string, target: 'new' | 'active' | 'completed') => void;
+  actions: { label: string; target: 'new' | 'active' | 'completed' }[];
 };
+
+const IncidentRow = React.memo(
+  ({
+    incident,
+    siteName,
+    assetName,
+    alarmLabel,
+    onDragStart,
+    actions,
+    onMoveIncident
+  }: {
+    incident: Incident;
+    siteName: string;
+    assetName: string;
+    alarmLabel: string;
+    onDragStart: (event: React.DragEvent<HTMLTableRowElement>) => void;
+    actions: { label: string; target: 'new' | 'active' | 'completed' }[];
+    onMoveIncident: (incidentId: string, target: 'new' | 'active' | 'completed') => void;
+  }) => {
+    return (
+      <tr
+        draggable
+        onDragStart={onDragStart}
+        className='incidents-section__row'
+      >
+        <td>{incident.priority}</td>
+        <td>{siteName}</td>
+        <td>{assetName}</td>
+        <td>{alarmLabel}</td>
+        <td>{incident.occurrences}</td>
+        <td>
+          <StatusPill status={incident.stateId} />
+        </td>
+        <td>{formatTimestamp(incident.createdAt)}</td>
+        <td className='incidents-section__actions'>
+          <a
+            className='incidents-section__link'
+            href={`#/incident/${incident.incidentId}`}
+            aria-label={`View details for incident ${incident.incidentId}`}
+          >
+            View
+          </a>
+          {actions.map(action => (
+            <button
+              key={action.label}
+              type='button'
+              className='incidents-section__action'
+              aria-label={`${action.label} for incident ${incident.incidentId}`}
+              onClick={() => onMoveIncident(incident.incidentId, action.target)}
+            >
+              {action.label}
+            </button>
+          ))}
+        </td>
+      </tr>
+    );
+  }
+);
 
 export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
   title,
@@ -26,12 +87,18 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
   assets,
   alarms,
   onDropIncident,
-  onDragStart
+  onDragStart,
+  onMoveIncident,
+  actions
 }) => {
   // Build lookup maps so we avoid repeated array searches while rendering rows.
   const siteMap = useMemo(() => new Map(sites.map(site => [site.id, site])), [sites]);
   const assetMap = useMemo(() => new Map(assets.map(asset => [asset.id, asset])), [assets]);
   const alarmMap = useMemo(() => new Map(alarms.map(alarm => [alarm.alarmId, alarm])), [alarms]);
+  const [visibleCount, setVisibleCount] = useState(25);
+
+  // Window the rows to keep rendering snappy with large datasets.
+  const visibleIncidents = useMemo(() => incidents.slice(0, visibleCount), [incidents, visibleCount]);
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     // Read the incident id from the drag payload and forward it to the parent.
@@ -67,44 +134,42 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
                 <th>Occurrences</th>
                 <th>Status</th>
                 <th>Created</th>
-                <th>Details</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {incidents.map(incident => {
+              {visibleIncidents.map(incident => {
                 const site = siteMap.get(incident.siteId);
                 const asset = assetMap.get(incident.assetId);
                 const alarm = alarmMap.get(incident.alarmId);
+                const alarmLabel = `${alarm?.code ?? 'Unknown'}${alarm?.description ? ` ${alarm.description}` : ''}`;
 
                 return (
-                  <tr
+                  <IncidentRow
                     key={incident.incidentId}
-                    draggable
+                    incident={incident}
+                    siteName={site?.name ?? 'Unknown'}
+                    assetName={asset?.displayName ?? 'Unknown'}
+                    alarmLabel={alarmLabel}
                     onDragStart={event => onDragStart(incident.incidentId, event)}
-                    className='incidents-section__row'
-                  >
-                    <td>{incident.priority}</td>
-                    <td>{site?.name ?? 'Unknown'}</td>
-                    <td>{asset?.displayName ?? 'Unknown'}</td>
-                    <td>
-                      {alarm?.code ?? 'Unknown'}
-                      <span className='incidents-section__muted'> {alarm?.description ?? ''}</span>
-                    </td>
-                    <td>{incident.occurrences}</td>
-                    <td>{incident.stateId}</td>
-                    <td>{formatTimestamp(incident.createdAt)}</td>
-                    <td>
-                      <a className='incidents-section__link' href={`#/incident/${incident.incidentId}`}>
-                        View
-                      </a>
-                    </td>
-                  </tr>
+                    actions={actions}
+                    onMoveIncident={onMoveIncident}
+                  />
                 );
               })}
             </tbody>
           </table>
         </div>
       )}
+      {incidents.length > visibleCount ? (
+        <button
+          type='button'
+          className='incidents-section__show-more'
+          onClick={() => setVisibleCount(prev => prev + 25)}
+        >
+          Show more
+        </button>
+      ) : null}
       <p className='incidents-section__hint'>Drag incidents into another list to change status.</p>
     </section>
   );

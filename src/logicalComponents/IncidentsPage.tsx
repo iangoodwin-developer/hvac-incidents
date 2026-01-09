@@ -5,6 +5,7 @@ import { INCIDENT_STATES } from '../constants';
 import { Catalog, Incident } from '../types';
 import { PageHeader } from '../stylingComponents/PageHeader/PageHeader';
 import { IncidentsSection } from '../stylingComponents/IncidentsSection/IncidentsSection';
+import { ConnectionBanner } from '../stylingComponents/ConnectionBanner/ConnectionBanner';
 import { ConnectionStatus } from './useIncidentSocket';
 import { getIncidentsByType } from './incidentFilters';
 
@@ -20,6 +21,8 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({ incidents, catalog
   // Keep track of the currently selected filters in local state.
   const [selectedEscalation, setSelectedEscalation] = useState<string>('');
   const [selectedIncidentTypes, setSelectedIncidentTypes] = useState<string[]>([]);
+  // When connected but catalog is still empty, show a simple loading state.
+  const isLoading = connectionStatus === 'connected' && catalog.escalationLevels.length === 0;
 
   useEffect(() => {
     // Default the escalation filter to the first known level.
@@ -62,6 +65,11 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({ incidents, catalog
     };
 
     updateIncident(updated);
+  };
+
+  const handleMove = (incidentId: string, target: 'new' | 'active' | 'completed') => {
+    // Buttons reuse the same handler as drag-and-drop for consistency.
+    handleDrop(target, incidentId);
   };
 
   const handleDragStart = (incidentId: string, event: React.DragEvent<HTMLTableRowElement>) => {
@@ -109,6 +117,11 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({ incidents, catalog
         </div>
       </PageHeader>
 
+      <ConnectionBanner status={connectionStatus} />
+
+      {isLoading ? (
+        <p className='incidents-page__loading'>Loading incidents...</p>
+      ) : (
       <main className='incidents-page__content'>
         <IncidentsSection
           title='New incidents'
@@ -118,6 +131,11 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({ incidents, catalog
           alarms={catalog.alarms}
           onDropIncident={id => handleDrop('new', id)}
           onDragStart={handleDragStart}
+          onMoveIncident={handleMove}
+          actions={[
+            { label: 'Move to Active', target: 'active' },
+            { label: 'Move to Completed', target: 'completed' }
+          ]}
         />
         <IncidentsSection
           title='Active incidents'
@@ -127,6 +145,11 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({ incidents, catalog
           alarms={catalog.alarms}
           onDropIncident={id => handleDrop('active', id)}
           onDragStart={handleDragStart}
+          onMoveIncident={handleMove}
+          actions={[
+            { label: 'Move to New', target: 'new' },
+            { label: 'Move to Completed', target: 'completed' }
+          ]}
         />
         <IncidentsSection
           title='Completed incidents'
@@ -136,8 +159,11 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({ incidents, catalog
           alarms={catalog.alarms}
           onDropIncident={id => handleDrop('completed', id)}
           onDragStart={handleDragStart}
+          onMoveIncident={handleMove}
+          actions={[{ label: 'Reopen', target: 'active' }]}
         />
       </main>
+      )}
     </div>
   );
 };

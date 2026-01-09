@@ -6,6 +6,8 @@
 @import './stylingComponents/PageHeader/PageHeader.scss';
 @import './stylingComponents/IncidentsSection/IncidentsSection.scss';
 @import './stylingComponents/IncidentChart/IncidentChart.scss';
+@import './stylingComponents/ConnectionBanner/ConnectionBanner.scss';
+@import './stylingComponents/StatusPill/StatusPill.scss';
 
 .app {
   min-height: 100vh;
@@ -45,6 +47,12 @@
   &__hint {
     font-size: 0.75rem;
     color: #7b8794;
+  }
+
+  &__loading {
+    margin: 0;
+    padding: 1rem 0;
+    color: #52606d;
   }
 
   &__checkboxes {
