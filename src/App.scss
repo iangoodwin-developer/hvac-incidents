@@ -1,3 +1,6 @@
+@import './stylingComponents/PageHeader/PageHeader.scss';
+@import './stylingComponents/IncidentsSection/IncidentsSection.scss';
+
 .app {
   min-height: 100vh;
   padding: 2rem 2.5rem 3rem;
@@ -6,45 +9,23 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.page-header {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-.page-header h1 {
-  margin: 0 0 0.25rem;
-  font-size: 2rem;
-}
-
-.subtitle {
-  margin: 0;
-  color: #52606d;
-}
-
-.status {
-  margin: 0.35rem 0 0;
-  font-size: 0.85rem;
-  color: #486581;
-}
-
-.filters {
+.incidents-page__filters {
   display: grid;
   gap: 1rem;
-  min-width: 220px;
 }
 
-.filters label {
+.incidents-page__field {
   display: grid;
   gap: 0.5rem;
   font-size: 0.9rem;
   color: #334e68;
 }
 
-.filters select {
+.incidents-page__label {
+  font-weight: 600;
+}
+
+.incidents-page__field select {
   padding: 0.5rem 0.6rem;
   border: 1px solid #cbd2d9;
   border-radius: 6px;
@@ -52,83 +33,47 @@
   font-size: 0.95rem;
 }
 
-.hint {
+.incidents-page__hint {
   font-size: 0.75rem;
   color: #7b8794;
 }
 
-.nav-links {
+.incidents-page__nav {
   display: flex;
   gap: 1rem;
   font-size: 0.9rem;
 }
 
-.nav-links a {
+.incidents-page__nav a {
   color: #1d4ed8;
   text-decoration: none;
 }
 
-.nav-links a:hover {
+.incidents-page__nav a:hover {
   text-decoration: underline;
 }
 
-.incidents-section {
-  margin-bottom: 2rem;
-}
-
-.incidents-section h2 {
-  margin-bottom: 0.75rem;
-  font-size: 1.2rem;
-  color: #243b53;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #e4e7eb;
-}
-
-.table-wrapper table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 720px;
-}
-
-.table-wrapper th,
-.table-wrapper td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e4e7eb;
-  text-align: left;
+.create-page__nav {
+  display: flex;
+  gap: 1rem;
   font-size: 0.9rem;
 }
 
-.table-wrapper th {
-  background: #f0f4f8;
-  color: #102a43;
-  font-weight: 600;
+.create-page__nav a {
+  color: #1d4ed8;
+  text-decoration: none;
 }
 
-.muted {
-  color: #7b8794;
-  margin-left: 0.25rem;
+.create-page__nav a:hover {
+  text-decoration: underline;
 }
 
-.empty-state {
-  padding: 1rem;
-  background: #fff;
-  border: 1px dashed #cbd2d9;
-  border-radius: 8px;
-  color: #52606d;
+.create-page__content {
+  display: flex;
+  justify-content: flex-start;
 }
 
-.create-section h2 {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  color: #243b53;
-}
-
-.incident-form {
+.create-page__form {
   display: grid;
   gap: 1rem;
   max-width: 520px;
@@ -138,22 +83,26 @@
   border-radius: 10px;
 }
 
-.incident-form label {
+.create-page__field {
   display: grid;
   gap: 0.5rem;
   font-size: 0.9rem;
   color: #334e68;
 }
 
-.incident-form input,
-.incident-form select {
+.create-page__label {
+  font-weight: 600;
+}
+
+.create-page__field input,
+.create-page__field select {
   padding: 0.55rem 0.65rem;
   border: 1px solid #cbd2d9;
   border-radius: 6px;
   font-size: 0.95rem;
 }
 
-.incident-form button {
+.create-page__button {
   border: none;
   padding: 0.65rem 1.2rem;
   border-radius: 6px;
@@ -163,7 +112,7 @@
   cursor: pointer;
 }
 
-.incident-form button:hover {
+.create-page__button:hover {
   background: #1e40af;
 }
 
@@ -172,7 +121,7 @@
     padding: 1.5rem;
   }
 
-  .filters {
+  .page-header__actions {
     width: 100%;
   }
 }

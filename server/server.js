@@ -68,7 +68,7 @@ const incidents = [
     occurrences: 4,
     createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
     assignedTo: 'user-1',
-    stateId: 'OBSERVED',
+    stateId: 'OPEN',
     escalationLevelId: 'esc-2',
     lvl2SkillId: 'skill-scada'
   },
@@ -126,6 +126,17 @@ wss.on('connection', socket => {
       const incident = message.incident;
       incidents.unshift(incident);
       broadcast({ type: 'incidentAdded', incident });
+    }
+
+    if (message?.type === 'updateIncident' && message.incident) {
+      const incident = message.incident;
+      const index = incidents.findIndex(item => item.incidentId === incident.incidentId);
+      if (index >= 0) {
+        incidents[index] = incident;
+      } else {
+        incidents.unshift(incident);
+      }
+      broadcast({ type: 'incidentUpdated', incident });
     }
   });
 });

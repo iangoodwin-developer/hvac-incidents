@@ -1,0 +1,38 @@
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.page-header__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.page-header__title {
+  margin: 0;
+  font-size: 2rem;
+  color: #1f2933;
+}
+
+.page-header__subtitle {
+  margin: 0;
+  color: #52606d;
+}
+
+.page-header__status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #486581;
+}
+
+.page-header__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 220px;
+}
