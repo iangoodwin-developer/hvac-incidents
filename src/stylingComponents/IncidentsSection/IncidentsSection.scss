@@ -1,3 +1,7 @@
+/*
+  Styles for incident list sections, including drag-and-drop affordances.
+*/
+
 .incidents-section {
   margin-bottom: 2rem;
 }
@@ -18,7 +22,7 @@
 .incidents-section__table table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 720px;
+  min-width: 760px;
 }
 
 .incidents-section__table th,
@@ -46,6 +50,16 @@
 .incidents-section__muted {
   color: #7b8794;
   margin-left: 0.25rem;
+}
+
+.incidents-section__link {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.incidents-section__link:hover {
+  text-decoration: underline;
 }
 
 .incidents-section__empty {

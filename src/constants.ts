@@ -1,6 +1,8 @@
+// Shared constants that describe incident states and labels.
+// Keeping this here avoids scattering magic strings across the UI.
+
 export const INCIDENT_STATES = {
   OPEN: 'OPEN',
-  OBSERVED: 'OBSERVED',
   CLOSED: 'CLOSED'
 } as const;
 

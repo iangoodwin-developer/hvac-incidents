@@ -1,3 +1,6 @@
+// Reusable page header component.
+// Keeps consistent spacing and typography across pages.
+
 import React from 'react';
 
 type PageHeaderProps = {
@@ -8,6 +11,7 @@ type PageHeaderProps = {
 };
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, statusLabel, children }) => {
+  // Render optional subtitle, status, and right-side actions when provided.
   return (
     <header className='page-header'>
       <div className='page-header__intro'>

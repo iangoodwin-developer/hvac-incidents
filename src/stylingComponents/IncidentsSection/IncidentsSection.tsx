@@ -1,3 +1,6 @@
+// Presentational list component that renders a table and drag targets.
+// It stays stateless by receiving handlers from the incidents page.
+
 import React, { useMemo } from 'react';
 import { Alarm, Asset, Incident, Site } from '../../types';
 
@@ -25,11 +28,13 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
   onDropIncident,
   onDragStart
 }) => {
+  // Build lookup maps so we avoid repeated array searches while rendering rows.
   const siteMap = useMemo(() => new Map(sites.map(site => [site.id, site])), [sites]);
   const assetMap = useMemo(() => new Map(assets.map(asset => [asset.id, asset])), [assets]);
   const alarmMap = useMemo(() => new Map(alarms.map(alarm => [alarm.alarmId, alarm])), [alarms]);
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    // Read the incident id from the drag payload and forward it to the parent.
     event.preventDefault();
     const incidentId = event.dataTransfer.getData('text/plain');
     if (incidentId) {
@@ -62,6 +67,7 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
                 <th>Occurrences</th>
                 <th>Status</th>
                 <th>Created</th>
+                <th>Details</th>
               </tr>
             </thead>
             <tbody>
@@ -71,12 +77,12 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
                 const alarm = alarmMap.get(incident.alarmId);
 
                 return (
-                    <tr
-                      key={incident.incidentId}
-                      draggable
-                      onDragStart={event => onDragStart(incident.incidentId, event)}
-                      className='incidents-section__row'
-                    >
+                  <tr
+                    key={incident.incidentId}
+                    draggable
+                    onDragStart={event => onDragStart(incident.incidentId, event)}
+                    className='incidents-section__row'
+                  >
                     <td>{incident.priority}</td>
                     <td>{site?.name ?? 'Unknown'}</td>
                     <td>{asset?.displayName ?? 'Unknown'}</td>
@@ -87,6 +93,11 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
                     <td>{incident.occurrences}</td>
                     <td>{incident.stateId}</td>
                     <td>{formatTimestamp(incident.createdAt)}</td>
+                    <td>
+                      <a className='incidents-section__link' href={`#/incident/${incident.incidentId}`}>
+                        View
+                      </a>
+                    </td>
                   </tr>
                 );
               })}

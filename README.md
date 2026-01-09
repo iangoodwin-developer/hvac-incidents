@@ -1,5 +1,35 @@
 # Getting Started with Create React App
 
+## Project Notes (Interview Focus)
+
+This app is a lightweight real-time dashboard demo. It uses:
+- A simple WebSocket server in `server/server.js` for in-memory incidents and live readings.
+- A hash-based router so we can show list, create, and detail pages without extra libraries.
+- CSS-only chart bars to visualize incident temperature over time.
+
+The source is split into:
+- `src/logicalComponents` for stateful logic and page flows.
+- `src/stylingComponents` for presentational components.
+
+## Bootstrap, Build, and Runtime Notes
+
+This project was created with Create React App (CRA) using the TypeScript template.
+CRA provides the dev server, production build pipeline, and TypeScript tooling out of the box.
+
+Key scripts:
+- `npm start` runs the CRA dev server (hot reload, TypeScript checking).
+- `npm run build` produces a production bundle in `build/`.
+- `npm run server` starts the local WebSocket server that powers real-time updates.
+
+How it compiles:
+- CRA uses `react-scripts` to compile TypeScript, bundle modules, and handle CSS/Sass.
+- SCSS is compiled by the `sass` package and then processed by CRA's build pipeline.
+
+How the server works:
+- The server is a small Node process using the `ws` WebSocket library.
+- It keeps incidents in memory, seeds historical readings, and emits updates at a fixed interval.
+- The client subscribes once and then responds to `init`, `incidentAdded`, and `incidentUpdated` events.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

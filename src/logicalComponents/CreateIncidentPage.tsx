@@ -1,3 +1,6 @@
+// Separate page for creating a new incident without the list filters.
+// This keeps the creation workflow focused and easy to demo.
+
 import React, { useEffect, useState } from 'react';
 import { Catalog, Incident } from '../types';
 import { INCIDENT_STATE_OPTIONS, INCIDENT_STATES, IncidentState } from '../constants';
@@ -25,9 +28,11 @@ type CreateIncidentPageProps = {
 };
 
 export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog, connectionStatus, sendIncident }) => {
+  // Form state lives locally so inputs remain controlled.
   const [formState, setFormState] = useState<IncidentFormState>(createEmptyForm());
 
   useEffect(() => {
+    // Pre-fill dropdowns with the first catalog entries once data is loaded.
     if (!catalog.escalationLevels.length && !catalog.skills.length && !catalog.sites.length && !catalog.assets.length && !catalog.alarms.length) {
       return;
     }
@@ -43,6 +48,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
   }, [catalog]);
 
   const handleFormChange = (field: keyof IncidentFormState, value: string) => {
+    // Normalize numeric inputs so the incident payload is typed correctly.
     setFormState(prev => {
       if (field === 'priority' || field === 'occurrences') {
         return { ...prev, [field]: Number(value) };
@@ -52,6 +58,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
   };
 
   const submitIncident = (event: React.FormEvent<HTMLFormElement>) => {
+    // Build a new incident payload and send it through the WebSocket.
     event.preventDefault();
     const incidentId = formState.incidentId.trim() || `inc-${Date.now()}`;
     const newIncident: Incident = {
@@ -69,6 +76,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
 
     sendIncident(newIncident);
 
+    // Reset only the fields that feel safe to clear for quick entry.
     setFormState(prev => ({
       ...prev,
       incidentId: '',

@@ -1,5 +1,11 @@
+/*
+  Global layout styles and page-level blocks.
+  Component-specific styles live in the stylingComponents folders.
+*/
+
 @import './stylingComponents/PageHeader/PageHeader.scss';
 @import './stylingComponents/IncidentsSection/IncidentsSection.scss';
+@import './stylingComponents/IncidentChart/IncidentChart.scss';
 
 .app {
   min-height: 100vh;
@@ -8,6 +14,8 @@
   color: #1f2933;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+/* Incidents list page styles */
 
 .incidents-page__filters {
   display: grid;
@@ -52,6 +60,8 @@
 .incidents-page__nav a:hover {
   text-decoration: underline;
 }
+
+/* Create incident page styles */
 
 .create-page__nav {
   display: flex;
@@ -115,6 +125,72 @@
 .create-page__button:hover {
   background: #1e40af;
 }
+
+/* Incident detail page styles */
+
+.incident-detail__nav {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.incident-detail__nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.incident-detail__nav a:hover {
+  text-decoration: underline;
+}
+
+.incident-detail__content {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.incident-detail__card {
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #e4e7eb;
+  border-radius: 12px;
+}
+
+.incident-detail__title {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+  color: #243b53;
+}
+
+.incident-detail__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.incident-detail__item {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.incident-detail__label {
+  font-size: 0.85rem;
+  color: #7b8794;
+}
+
+.incident-detail__value {
+  font-weight: 600;
+  color: #1f2933;
+}
+
+.incident-detail__empty {
+  padding: 1rem;
+  background: #fff;
+  border: 1px dashed #cbd2d9;
+  border-radius: 8px;
+  color: #52606d;
+}
+
+/* Responsive tweaks */
 
 @media (max-width: 768px) {
   .app {

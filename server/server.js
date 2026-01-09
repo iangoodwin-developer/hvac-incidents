@@ -1,7 +1,13 @@
+// Lightweight WebSocket server that keeps all data in memory.
+// This is intentionally simple to make the real-time flow easy to explain.
+
 const { WebSocketServer } = require('ws');
 
 const PORT = process.env.WS_PORT ? Number(process.env.WS_PORT) : 8080;
+const MAX_READINGS = 24;
+const READING_INTERVAL_MS = 2000;
 
+// Reference data (catalog) that the UI uses for labels and dropdowns.
 const escalationLevels = [
   { id: 'esc-1', name: 'Level 1' },
   { id: 'esc-2', name: 'Level 2' }
@@ -33,6 +39,7 @@ const alarms = [
   { alarmId: 'alarm-420', code: 'HV-420', description: 'BAS comms loss', legacyId: '420' }
 ];
 
+// Seed incidents. Each incident contains a small history of readings.
 const incidents = [
   {
     incidentId: 'inc-1001',
@@ -88,6 +95,33 @@ const incidents = [
   }
 ];
 
+// Generate a temperature/pressure reading with a small random drift.
+const createReading = previous => {
+  const temperatureBase = previous ? previous.temperature : 68 + Math.random() * 12;
+  const pressureBase = previous ? previous.pressure : 18 + Math.random() * 6;
+  const temperature = Number((temperatureBase + (Math.random() * 4 - 2)).toFixed(1));
+  const pressure = Number((pressureBase + (Math.random() * 2 - 1)).toFixed(2));
+
+  return {
+    timestamp: new Date().toISOString(),
+    temperature,
+    pressure
+  };
+};
+
+const seedReadings = () => {
+  incidents.forEach(incident => {
+    const readings = [];
+    for (let i = 0; i < MAX_READINGS; i += 1) {
+      const previous = readings[readings.length - 1];
+      readings.push(createReading(previous));
+    }
+    incident.readings = readings;
+  });
+};
+
+seedReadings();
+
 const wss = new WebSocketServer({ port: PORT });
 
 const broadcast = message => {
@@ -100,6 +134,7 @@ const broadcast = message => {
 };
 
 wss.on('connection', socket => {
+  // On first connection, send everything the UI needs to render.
   socket.send(
     JSON.stringify({
       type: 'init',
@@ -124,6 +159,10 @@ wss.on('connection', socket => {
 
     if (message?.type === 'addIncident' && message.incident) {
       const incident = message.incident;
+      const previousReading = incident.readings?.[incident.readings.length - 1];
+      if (!incident.readings || incident.readings.length === 0) {
+        incident.readings = [createReading(previousReading)];
+      }
       incidents.unshift(incident);
       broadcast({ type: 'incidentAdded', incident });
     }
@@ -140,5 +179,17 @@ wss.on('connection', socket => {
     }
   });
 });
+
+// Push a new reading for every incident on a fixed interval to simulate live data.
+setInterval(() => {
+  incidents.forEach(incident => {
+    const readings = incident.readings ?? [];
+    const previous = readings[readings.length - 1];
+    const nextReading = createReading(previous);
+    const nextReadings = [...readings, nextReading].slice(-MAX_READINGS);
+    incident.readings = nextReadings;
+    broadcast({ type: 'incidentUpdated', incident });
+  });
+}, READING_INTERVAL_MS);
 
 console.log(`WebSocket server listening on ws://localhost:${PORT}`);
