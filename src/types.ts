@@ -3,7 +3,7 @@
 // contracts between the UI and the WebSocket server.
 
 export type EscalationLevel = { id: string; name: string };
-export type Skill = { id: string; name: string };
+export type IncidentType = { id: string; name: string };
 export type Site = { id: string; name: string };
 export type Asset = { id: string; siteId: string; displayName: string; model: string; regionName: string };
 export type Alarm = { alarmId: string; code: string; description: string; legacyId?: string };
@@ -28,14 +28,13 @@ export type Incident = {
   assignedTo?: string | null;
   stateId: string;
   escalationLevelId: string;
-  lvl1SkillId?: string;
-  lvl2SkillId?: string;
+  incidentTypeIds?: string[];
   readings?: IncidentReading[];
 };
 
 export type Catalog = {
   escalationLevels: EscalationLevel[];
-  skills: Skill[];
+  incidentTypes: IncidentType[];
   sites: Site[];
   assets: Asset[];
   alarms: Alarm[];

@@ -8,76 +8,76 @@
   background: #fff;
   border: 1px solid #e4e7eb;
   border-radius: 12px;
-}
 
-.incident-chart__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
 
-.incident-chart__title {
-  margin: 0;
-  font-size: 1rem;
-  color: #243b53;
-}
+  &__title {
+    margin: 0;
+    font-size: 1rem;
+    color: #243b53;
+  }
 
-.incident-chart__value {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 600;
-}
+  &__value {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+  }
 
-.incident-chart__value-number {
-  font-size: 1rem;
-}
+  &__value-number {
+    font-size: 1rem;
 
-.incident-chart__value-number--rising {
-  color: #0b7849;
-}
+    &--rising {
+      color: #0b7849;
+    }
 
-.incident-chart__value-number--falling {
-  color: #b91c1c;
-}
+    &--falling {
+      color: #b91c1c;
+    }
 
-.incident-chart__value-number--steady {
-  color: #334e68;
-}
+    &--steady {
+      color: #334e68;
+    }
+  }
 
-.incident-chart__value-arrow {
-  font-size: 1rem;
-  color: #52606d;
-}
+  &__value-arrow {
+    font-size: 1rem;
+    color: #52606d;
+  }
 
-.incident-chart__bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.35rem;
-  height: 160px;
-  padding: 0.5rem;
-  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
-  border-radius: 8px;
-  border: 1px solid #e4e7eb;
-}
+  &__bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.35rem;
+    height: 160px;
+    padding: 0.5rem;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    border-radius: 8px;
+    border: 1px solid #e4e7eb;
+  }
 
-.incident-chart__bar {
-  flex: 1;
-  min-width: 6px;
-  background: #3b82f6;
-  border-radius: 6px 6px 2px 2px;
-  transition: height 0.4s ease;
-}
+  &__bar {
+    flex: 1;
+    min-width: 6px;
+    background: #3b82f6;
+    border-radius: 6px 6px 2px 2px;
+    transition: height 0.4s ease;
+  }
 
-.incident-chart__empty {
-  margin: 0;
-  color: #7b8794;
-}
+  &__empty {
+    margin: 0;
+    color: #7b8794;
+  }
 
-.incident-chart__caption {
-  margin: 0.75rem 0 0;
-  font-size: 0.8rem;
-  color: #7b8794;
+  &__caption {
+    margin: 0.75rem 0 0;
+    font-size: 0.8rem;
+    color: #7b8794;
+  }
 }

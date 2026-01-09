@@ -8,7 +8,7 @@ export type ConnectionStatus = 'connected' | 'disconnected';
 
 const emptyCatalog: Catalog = {
   escalationLevels: [],
-  skills: [],
+  incidentTypes: [],
   sites: [],
   assets: [],
   alarms: []
@@ -61,7 +61,11 @@ export const useIncidentSocket = () => {
           setIncidents(payload.incidents);
         }
         if (payload.catalog) {
-          setCatalog(payload.catalog);
+          // Merge with defaults to avoid undefined fields while server restarts.
+          setCatalog({
+            ...emptyCatalog,
+            ...payload.catalog
+          });
         }
       }
 

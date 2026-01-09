@@ -13,11 +13,11 @@ const escalationLevels = [
   { id: 'esc-2', name: 'Level 2' }
 ];
 
-const skills = [
-  { id: 'skill-elec', name: 'Electrical' },
-  { id: 'skill-mech', name: 'Cooling' },
-  { id: 'skill-scada', name: 'Controls' },
-  { id: 'skill-ops', name: 'Facilities' }
+const incidentTypes = [
+  { id: 'type-electrical', name: 'Electrical' },
+  { id: 'type-cooling', name: 'Cooling' },
+  { id: 'type-controls', name: 'Controls' },
+  { id: 'type-facilities', name: 'Facilities' }
 ];
 
 const sites = [
@@ -51,7 +51,7 @@ const incidents = [
     createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
     stateId: 'OPEN',
     escalationLevelId: 'esc-1',
-    lvl1SkillId: 'skill-elec'
+    incidentTypeIds: ['type-electrical']
   },
   {
     incidentId: 'inc-1002',
@@ -64,7 +64,7 @@ const incidents = [
     assignedTo: 'user-2',
     stateId: 'OPEN',
     escalationLevelId: 'esc-1',
-    lvl1SkillId: 'skill-mech'
+    incidentTypeIds: ['type-cooling']
   },
   {
     incidentId: 'inc-1003',
@@ -77,7 +77,7 @@ const incidents = [
     assignedTo: 'user-1',
     stateId: 'OPEN',
     escalationLevelId: 'esc-2',
-    lvl2SkillId: 'skill-scada'
+    incidentTypeIds: ['type-controls']
   },
   {
     incidentId: 'inc-1004',
@@ -91,7 +91,7 @@ const incidents = [
     assignedTo: 'user-1',
     stateId: 'CLOSED',
     escalationLevelId: 'esc-2',
-    lvl2SkillId: 'skill-ops'
+    incidentTypeIds: ['type-facilities']
   }
 ];
 
@@ -141,7 +141,7 @@ wss.on('connection', socket => {
       incidents,
       catalog: {
         escalationLevels,
-        skills,
+        incidentTypes,
         sites,
         assets,
         alarms

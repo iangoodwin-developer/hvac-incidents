@@ -4,74 +4,74 @@
 
 .incidents-section {
   margin-bottom: 2rem;
-}
 
-.incidents-section__title {
-  margin-bottom: 0.75rem;
-  font-size: 1.2rem;
-  color: #243b53;
-}
+  &__title {
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+    color: #243b53;
+  }
 
-.incidents-section__table {
-  overflow-x: auto;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #e4e7eb;
-}
+  &__table {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e4e7eb;
 
-.incidents-section__table table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 760px;
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
 
-.incidents-section__table th,
-.incidents-section__table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e4e7eb;
-  text-align: left;
-  font-size: 0.9rem;
-}
+    th,
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e4e7eb;
+      text-align: left;
+      font-size: 0.9rem;
+    }
 
-.incidents-section__table th {
-  background: #f0f4f8;
-  color: #102a43;
-  font-weight: 600;
-}
+    th {
+      background: #f0f4f8;
+      color: #102a43;
+      font-weight: 600;
+    }
+  }
 
-.incidents-section__row {
-  cursor: grab;
-}
+  &__row {
+    cursor: grab;
 
-.incidents-section__row:active {
-  cursor: grabbing;
-}
+    &:active {
+      cursor: grabbing;
+    }
+  }
 
-.incidents-section__muted {
-  color: #7b8794;
-  margin-left: 0.25rem;
-}
+  &__muted {
+    color: #7b8794;
+    margin-left: 0.25rem;
+  }
 
-.incidents-section__link {
-  color: #1d4ed8;
-  text-decoration: none;
-  font-weight: 600;
-}
+  &__link {
+    color: #1d4ed8;
+    text-decoration: none;
+    font-weight: 600;
 
-.incidents-section__link:hover {
-  text-decoration: underline;
-}
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 
-.incidents-section__empty {
-  padding: 1rem;
-  background: #fff;
-  border: 1px dashed #cbd2d9;
-  border-radius: 8px;
-  color: #52606d;
-}
+  &__empty {
+    padding: 1rem;
+    background: #fff;
+    border: 1px dashed #cbd2d9;
+    border-radius: 8px;
+    color: #52606d;
+  }
 
-.incidents-section__hint {
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
-  color: #7b8794;
+  &__hint {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #7b8794;
+  }
 }

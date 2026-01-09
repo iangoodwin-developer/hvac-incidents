@@ -18,12 +18,17 @@ CRA provides the dev server, production build pipeline, and TypeScript tooling o
 
 Key scripts:
 - `npm start` runs the CRA dev server (hot reload, TypeScript checking).
-- `npm run build` produces a production bundle in `build/`.
 - `npm run server` starts the local WebSocket server that powers real-time updates.
 
 How it compiles:
 - CRA uses `react-scripts` to compile TypeScript, bundle modules, and handle CSS/Sass.
 - SCSS is compiled by the `sass` package and then processed by CRA's build pipeline.
+
+Testing note:
+- The single unit test focuses on the incident bucketing/filter logic because it is pure business logic that directly affects which list items appear in, without coupling to UI rendering.
+
+Testing framework:
+- Create React App ships with Jest as the test runner (via `react-scripts test`), and we use `@types/jest` so TypeScript recognizes the Jest globals (`describe`, `it`, `expect`).
 
 How the server works:
 - The server is a small Node process using the `ws` WebSocket library.

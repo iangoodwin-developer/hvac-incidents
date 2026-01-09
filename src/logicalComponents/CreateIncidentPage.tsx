@@ -16,7 +16,7 @@ const createEmptyForm = () => ({
   occurrences: 1,
   stateId: INCIDENT_STATES.OPEN as IncidentState,
   escalationLevelId: '',
-  skillId: ''
+  incidentTypeId: ''
 });
 
 type IncidentFormState = ReturnType<typeof createEmptyForm>;
@@ -33,17 +33,23 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
 
   useEffect(() => {
     // Pre-fill dropdowns with the first catalog entries once data is loaded.
-    if (!catalog.escalationLevels.length && !catalog.skills.length && !catalog.sites.length && !catalog.assets.length && !catalog.alarms.length) {
+    if (
+      !(catalog.escalationLevels ?? []).length &&
+      !(catalog.incidentTypes ?? []).length &&
+      !(catalog.sites ?? []).length &&
+      !(catalog.assets ?? []).length &&
+      !(catalog.alarms ?? []).length
+    ) {
       return;
     }
 
     setFormState(prev => ({
       ...prev,
-      siteId: prev.siteId || catalog.sites[0]?.id || '',
-      assetId: prev.assetId || catalog.assets[0]?.id || '',
-      alarmId: prev.alarmId || catalog.alarms[0]?.alarmId || '',
-      escalationLevelId: prev.escalationLevelId || catalog.escalationLevels[0]?.id || '',
-      skillId: prev.skillId || catalog.skills[0]?.id || ''
+      siteId: prev.siteId || (catalog.sites ?? [])[0]?.id || '',
+      assetId: prev.assetId || (catalog.assets ?? [])[0]?.id || '',
+      alarmId: prev.alarmId || (catalog.alarms ?? [])[0]?.alarmId || '',
+      escalationLevelId: prev.escalationLevelId || (catalog.escalationLevels ?? [])[0]?.id || '',
+      incidentTypeId: prev.incidentTypeId || (catalog.incidentTypes ?? [])[0]?.id || ''
     }));
   }, [catalog]);
 
@@ -71,7 +77,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
       createdAt: new Date().toISOString(),
       stateId: formState.stateId,
       escalationLevelId: formState.escalationLevelId,
-      lvl1SkillId: formState.skillId
+      incidentTypeIds: formState.incidentTypeId ? [formState.incidentTypeId] : []
     };
 
     sendIncident(newIncident);
@@ -106,7 +112,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
           <label className='create-page__field'>
             <span className='create-page__label'>Site</span>
             <select value={formState.siteId} onChange={event => handleFormChange('siteId', event.target.value)}>
-              {catalog.sites.map(site => (
+              {(catalog.sites ?? []).map(site => (
                 <option key={site.id} value={site.id}>
                   {site.name}
                 </option>
@@ -116,7 +122,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
           <label className='create-page__field'>
             <span className='create-page__label'>Asset</span>
             <select value={formState.assetId} onChange={event => handleFormChange('assetId', event.target.value)}>
-              {catalog.assets.map(asset => (
+              {(catalog.assets ?? []).map(asset => (
                 <option key={asset.id} value={asset.id}>
                   {asset.displayName}
                 </option>
@@ -126,7 +132,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
           <label className='create-page__field'>
             <span className='create-page__label'>Alarm</span>
             <select value={formState.alarmId} onChange={event => handleFormChange('alarmId', event.target.value)}>
-              {catalog.alarms.map(alarm => (
+              {(catalog.alarms ?? []).map(alarm => (
                 <option key={alarm.alarmId} value={alarm.alarmId}>
                   {alarm.code}
                 </option>
@@ -168,7 +174,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
               value={formState.escalationLevelId}
               onChange={event => handleFormChange('escalationLevelId', event.target.value)}
             >
-              {catalog.escalationLevels.map(level => (
+              {(catalog.escalationLevels ?? []).map(level => (
                 <option key={level.id} value={level.id}>
                   {level.name}
                 </option>
@@ -176,11 +182,11 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({ catalog,
             </select>
           </label>
           <label className='create-page__field'>
-            <span className='create-page__label'>Skill</span>
-            <select value={formState.skillId} onChange={event => handleFormChange('skillId', event.target.value)}>
-              {catalog.skills.map(skill => (
-                <option key={skill.id} value={skill.id}>
-                  {skill.name}
+            <span className='create-page__label'>Incident type</span>
+            <select value={formState.incidentTypeId} onChange={event => handleFormChange('incidentTypeId', event.target.value)}>
+              {(catalog.incidentTypes ?? []).map(type => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
                 </option>
               ))}
             </select>
