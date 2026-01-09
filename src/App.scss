@@ -25,6 +25,12 @@
   color: #52606d;
 }
 
+.status {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #486581;
+}
+
 .filters {
   display: grid;
   gap: 1rem;
@@ -49,6 +55,21 @@
 .hint {
   font-size: 0.75rem;
   color: #7b8794;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.nav-links a {
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
 }
 
 .incidents-section {
@@ -99,6 +120,51 @@
   border: 1px dashed #cbd2d9;
   border-radius: 8px;
   color: #52606d;
+}
+
+.create-section h2 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: #243b53;
+}
+
+.incident-form {
+  display: grid;
+  gap: 1rem;
+  max-width: 520px;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #e4e7eb;
+  border-radius: 10px;
+}
+
+.incident-form label {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #334e68;
+}
+
+.incident-form input,
+.incident-form select {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.incident-form button {
+  border: none;
+  padding: 0.65rem 1.2rem;
+  border-radius: 6px;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.incident-form button:hover {
+  background: #1e40af;
 }
 
 @media (max-width: 768px) {
