@@ -44,6 +44,15 @@
     &:active {
       cursor: grabbing;
     }
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #1d4ed8;
+      outline-offset: -2px;
+    }
   }
 
   &__muted {
@@ -56,16 +65,6 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
-  }
-
-  &__link {
-    color: #1d4ed8;
-    text-decoration: none;
-    font-weight: 600;
-
-    &:hover {
-      text-decoration: underline;
-    }
   }
 
   &__action {

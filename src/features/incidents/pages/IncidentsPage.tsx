@@ -1,6 +1,7 @@
 // Main incidents list page with filters and drag-and-drop movement.
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { INCIDENT_STATES } from '../../../shared/constants';
 import { Catalog, Incident } from '../../../shared/types';
 import { PageHeader } from '../../../shared/components/PageHeader/PageHeader';
@@ -24,11 +25,25 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({
   updateIncident,
   lastError,
 }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   // Keep track of the currently selected filters in local state.
   const [selectedEscalation, setSelectedEscalation] = useState<string>('');
-  const [selectedIncidentTypes, setSelectedIncidentTypes] = useState<string[]>([]);
+  const [selectedIncidentType, setSelectedIncidentType] = useState<string>('');
   // When connected but catalog is still empty, show a simple loading state.
   const isLoading = connectionStatus === 'connected' && catalog.escalationLevels.length === 0;
+
+  useEffect(() => {
+    // Read initial filter state from the URL so the view is shareable/bookmarkable.
+    const escFromUrl = searchParams.get('esc') ?? '';
+    const typeFromUrl = searchParams.get('type') ?? '';
+    if (escFromUrl) {
+      setSelectedEscalation(escFromUrl);
+    }
+    if (typeFromUrl) {
+      setSelectedIncidentType(typeFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     // Default the escalation filter to the first known level.
@@ -37,26 +52,38 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({
     }
   }, [catalog.escalationLevels, selectedEscalation]);
 
+  useEffect(() => {
+    // Keep the URL in sync with the current filters.
+    const next = new URLSearchParams(searchParams);
+    if (selectedEscalation) {
+      next.set('esc', selectedEscalation);
+    } else {
+      next.delete('esc');
+    }
+    if (selectedIncidentType) {
+      next.set('type', selectedIncidentType);
+    } else {
+      next.delete('type');
+    }
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, selectedEscalation, selectedIncidentType, setSearchParams]);
+
   // Precompute each list to keep rendering fast and predictable.
+  const selectedIncidentTypeIds = selectedIncidentType ? [selectedIncidentType] : [];
   const filteredNew = useMemo(
-    () => getIncidentsByType(incidents, 'new', selectedEscalation, selectedIncidentTypes),
-    [incidents, selectedEscalation, selectedIncidentTypes]
+    () => getIncidentsByType(incidents, 'new', selectedEscalation, selectedIncidentTypeIds),
+    [incidents, selectedEscalation, selectedIncidentTypeIds]
   );
   const filteredActive = useMemo(
-    () => getIncidentsByType(incidents, 'active', selectedEscalation, selectedIncidentTypes),
-    [incidents, selectedEscalation, selectedIncidentTypes]
+    () => getIncidentsByType(incidents, 'active', selectedEscalation, selectedIncidentTypeIds),
+    [incidents, selectedEscalation, selectedIncidentTypeIds]
   );
   const filteredCompleted = useMemo(
-    () => getIncidentsByType(incidents, 'completed', selectedEscalation, selectedIncidentTypes),
-    [incidents, selectedEscalation, selectedIncidentTypes]
+    () => getIncidentsByType(incidents, 'completed', selectedEscalation, selectedIncidentTypeIds),
+    [incidents, selectedEscalation, selectedIncidentTypeIds]
   );
-
-  const handleIncidentTypeToggle = (typeId: string) => {
-    // Toggle incident types via checkboxes for easier selection.
-    setSelectedIncidentTypes((prev) =>
-      prev.includes(typeId) ? prev.filter((id) => id !== typeId) : [...prev, typeId]
-    );
-  };
 
   const handleDrop = (target: 'new' | 'active' | 'completed', incidentId: string) => {
     // Update state locally and send the change over WebSocket.
@@ -107,21 +134,20 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({
               ))}
             </select>
           </label>
-          <div className="incidents-page__field">
+          <label className="incidents-page__field">
             <span className="incidents-page__label">Incident types</span>
-            <div className="incidents-page__checkboxes">
+            <select
+              value={selectedIncidentType}
+              onChange={(event) => setSelectedIncidentType(event.target.value)}
+            >
+              <option value="">All</option>
               {(catalog.incidentTypes ?? []).map((type) => (
-                <label key={type.id} className="incidents-page__checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedIncidentTypes.includes(type.id)}
-                    onChange={() => handleIncidentTypeToggle(type.id)}
-                  />
-                  <span>{type.name}</span>
-                </label>
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
               ))}
-            </div>
-          </div>
+            </select>
+          </label>
           <nav className="incidents-page__nav">
             <a href="#/create">Create incident</a>
           </nav>
@@ -149,8 +175,8 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({
             onDragStart={handleDragStart}
             onMoveIncident={handleMove}
             actions={[
-              { label: 'Move to Active', target: 'active' },
-              { label: 'Move to Completed', target: 'completed' },
+              { label: 'Active', target: 'active' },
+              { label: 'Completed', target: 'completed' },
             ]}
           />
           <IncidentsSection
@@ -163,8 +189,8 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({
             onDragStart={handleDragStart}
             onMoveIncident={handleMove}
             actions={[
-              { label: 'Move to New', target: 'new' },
-              { label: 'Move to Completed', target: 'completed' },
+              { label: 'New', target: 'new' },
+              { label: 'Completed', target: 'completed' },
             ]}
           />
           <IncidentsSection

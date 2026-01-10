@@ -41,7 +41,22 @@ const IncidentRow = React.memo(
     onMoveIncident: (incidentId: string, target: 'new' | 'active' | 'completed') => void;
   }) => {
     return (
-      <tr draggable onDragStart={onDragStart} className="incidents-section__row">
+      <tr
+        draggable
+        onDragStart={onDragStart}
+        className="incidents-section__row"
+        role="button"
+        tabIndex={0}
+        onClick={() => {
+          window.location.hash = `#/incident/${incident.incidentId}`;
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            window.location.hash = `#/incident/${incident.incidentId}`;
+          }
+        }}
+      >
         <td>{incident.priority}</td>
         <td>{siteName}</td>
         <td>{assetName}</td>
@@ -52,20 +67,16 @@ const IncidentRow = React.memo(
         </td>
         <td>{formatTimestamp(incident.createdAt)}</td>
         <td className="incidents-section__actions">
-          <a
-            className="incidents-section__link"
-            href={`#/incident/${incident.incidentId}`}
-            aria-label={`View details for incident ${incident.incidentId}`}
-          >
-            View
-          </a>
           {actions.map((action) => (
             <button
               key={action.label}
               type="button"
               className="incidents-section__action"
               aria-label={`${action.label} for incident ${incident.incidentId}`}
-              onClick={() => onMoveIncident(incident.incidentId, action.target)}
+              onClick={(event) => {
+                event.stopPropagation();
+                onMoveIncident(incident.incidentId, action.target);
+              }}
             >
               {action.label}
             </button>
@@ -133,7 +144,7 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
                 <th>Occurrences</th>
                 <th>Status</th>
                 <th>Created</th>
-                <th>Actions</th>
+                <th>Move</th>
               </tr>
             </thead>
             <tbody>

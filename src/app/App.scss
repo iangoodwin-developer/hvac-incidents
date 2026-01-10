@@ -28,6 +28,7 @@
   &__filters {
     display: grid;
     gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 
   &__field {
@@ -76,6 +77,7 @@
       accent-color: #1d4ed8;
     }
   }
+
 
   &__nav {
     display: flex;
