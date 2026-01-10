@@ -31,8 +31,16 @@ const IncidentDetailRoute: React.FC<
   SharedRouteProps & {
     readingIntervalMs: number;
     setReadingIntervalMs: (value: number) => void;
+    lastError: string | null;
   }
-> = ({ incidents, catalog, connectionStatus, readingIntervalMs, setReadingIntervalMs }) => {
+> = ({
+  incidents,
+  catalog,
+  connectionStatus,
+  readingIntervalMs,
+  setReadingIntervalMs,
+  lastError,
+}) => {
   const { incidentId } = useParams();
   const incident = incidents.find((item) => item.incidentId === incidentId);
   return (
@@ -42,6 +50,7 @@ const IncidentDetailRoute: React.FC<
       connectionStatus={connectionStatus}
       readingIntervalMs={readingIntervalMs}
       setReadingIntervalMs={setReadingIntervalMs}
+      lastError={lastError}
     />
   );
 };
@@ -49,23 +58,29 @@ const IncidentDetailRoute: React.FC<
 const IncidentsRoute: React.FC<
   SharedRouteProps & {
     updateIncident: (incident: Incident) => void;
+    lastError: string | null;
   }
-> = ({ incidents, catalog, connectionStatus, updateIncident }) => (
+> = ({ incidents, catalog, connectionStatus, updateIncident, lastError }) => (
   <IncidentsPage
     incidents={incidents}
     catalog={catalog}
     connectionStatus={connectionStatus}
     updateIncident={updateIncident}
+    lastError={lastError}
   />
 );
 
 const CreateIncidentRoute: React.FC<
-  Omit<SharedRouteProps, 'incidents'> & { sendIncident: (incident: Incident) => void }
-> = ({ catalog, connectionStatus, sendIncident }) => (
+  Omit<SharedRouteProps, 'incidents'> & {
+    sendIncident: (incident: Incident) => void;
+    lastError: string | null;
+  }
+> = ({ catalog, connectionStatus, sendIncident, lastError }) => (
   <CreateIncidentPage
     catalog={catalog}
     connectionStatus={connectionStatus}
     sendIncident={sendIncident}
+    lastError={lastError}
   />
 );
 
@@ -78,6 +93,7 @@ export const AppRouter: React.FC = () => {
     updateIncident,
     readingIntervalMs,
     setReadingIntervalMs,
+    lastError,
   } = useIncidentSocket();
 
   return (
@@ -92,6 +108,7 @@ export const AppRouter: React.FC = () => {
                 catalog={catalog}
                 connectionStatus={connectionStatus}
                 updateIncident={updateIncident}
+                lastError={lastError}
               />
             }
           />
@@ -102,6 +119,7 @@ export const AppRouter: React.FC = () => {
                 catalog={catalog}
                 connectionStatus={connectionStatus}
                 sendIncident={sendIncident}
+                lastError={lastError}
               />
             }
           />
@@ -114,6 +132,7 @@ export const AppRouter: React.FC = () => {
                 connectionStatus={connectionStatus}
                 readingIntervalMs={readingIntervalMs}
                 setReadingIntervalMs={setReadingIntervalMs}
+                lastError={lastError}
               />
             }
           />

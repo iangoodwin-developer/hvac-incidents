@@ -158,6 +158,11 @@
       background: #1e40af;
     }
   }
+
+  &__error {
+    font-size: 0.8rem;
+    color: #b91c1c;
+  }
 }
 
 /* Incident detail page styles */
@@ -239,6 +244,16 @@
     border-radius: 8px;
     color: #52606d;
   }
+}
+
+.app-error {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.9rem;
 }
 
 /* Responsive tweaks */

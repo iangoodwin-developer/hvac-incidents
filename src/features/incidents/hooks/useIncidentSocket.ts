@@ -3,6 +3,7 @@
 
 import { useEffect, useEffectEvent, useReducer, useRef, useState } from 'react';
 import { Catalog, Incident } from '../../../shared/types';
+import { PROTOCOL_VERSION, ServerMessageSchema } from '../../../shared/schema';
 
 export type ConnectionStatus = 'connected' | 'disconnected';
 
@@ -19,6 +20,8 @@ type ServerPayload = {
   incidents?: Incident[];
   incident?: Incident;
   catalog?: Catalog;
+  message?: string;
+  code?: string;
 };
 
 type IncidentAction =
@@ -51,6 +54,7 @@ export const useIncidentSocket = () => {
   const [catalog, setCatalog] = useState<Catalog>(emptyCatalog);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [readingIntervalMs, setReadingIntervalMs] = useState(2000);
+  const [lastError, setLastError] = useState<string | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const lastUpdateRef = useRef(0);
 
@@ -66,12 +70,19 @@ export const useIncidentSocket = () => {
       return;
     }
 
-    const payload = parsed as ServerPayload | undefined;
-    if (!payload || !payload.type) {
+    // Shared schema validation keeps client/server contracts aligned at runtime.
+    const parsedResult = ServerMessageSchema.safeParse(parsed);
+    if (!parsedResult.success) {
+      setLastError('Received an unexpected message shape from the server.');
       return;
     }
+    const payload = parsedResult.data;
 
     if (payload.type === 'init') {
+      // If the protocol version changes, surface it instead of failing silently.
+      if (payload.protocolVersion && payload.protocolVersion !== PROTOCOL_VERSION) {
+        setLastError(`Protocol mismatch: expected ${PROTOCOL_VERSION}, got ${payload.protocolVersion}.`);
+      }
       // Initial payload carries the full catalog and current incident list.
       if (payload.incidents) {
         dispatch({ type: 'init', incidents: payload.incidents });
@@ -116,6 +127,9 @@ export const useIncidentSocket = () => {
 
     socket.addEventListener('open', () => {
       setConnectionStatus('connected');
+      setLastError(null);
+      // Send the current UI-selected interval so the server matches the client control.
+      socket.send(JSON.stringify({ type: 'setReadingInterval', intervalMs: readingIntervalMs }));
     });
 
     socket.addEventListener('close', () => {
@@ -140,7 +154,7 @@ export const useIncidentSocket = () => {
         return;
       }
 
-      if (payload.type === 'init') {
+    if (payload.type === 'init') {
         // Initial payload carries the full catalog and current incident list.
         if (payload.incidents) {
           dispatch({ type: 'init', incidents: payload.incidents });
@@ -152,9 +166,15 @@ export const useIncidentSocket = () => {
             ...payload.catalog,
           });
         }
-      }
+    }
 
-      if (payload.type === 'incidentAdded') {
+    if (payload.type === 'error') {
+      // Example error channel from the server so the UI can surface issues.
+      setLastError(payload.message ?? 'Unexpected server error.');
+      return;
+    }
+
+    if (payload.type === 'incidentAdded') {
         // Prepend the latest incident so the UI shows newest items first.
         const incident = payload.incident;
         if (!incident) {
@@ -212,6 +232,7 @@ export const useIncidentSocket = () => {
     connectionStatus,
     readingIntervalMs,
     setReadingIntervalMs,
+    lastError,
     sendIncident,
     updateIncident,
   };

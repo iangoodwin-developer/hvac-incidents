@@ -14,6 +14,7 @@ type IncidentsPageProps = {
   catalog: Catalog;
   connectionStatus: ConnectionStatus;
   updateIncident: (incident: Incident) => void;
+  lastError: string | null;
 };
 
 export const IncidentsPage: React.FC<IncidentsPageProps> = ({
@@ -21,6 +22,7 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({
   catalog,
   connectionStatus,
   updateIncident,
+  lastError,
 }) => {
   // Keep track of the currently selected filters in local state.
   const [selectedEscalation, setSelectedEscalation] = useState<string>('');
@@ -127,6 +129,11 @@ export const IncidentsPage: React.FC<IncidentsPageProps> = ({
       </PageHeader>
 
       <ConnectionBanner status={connectionStatus} />
+      {lastError ? (
+        <div className="app-error" role="alert">
+          {lastError}
+        </div>
+      ) : null}
 
       {isLoading ? (
         <p className="incidents-page__loading">Loading incidents...</p>

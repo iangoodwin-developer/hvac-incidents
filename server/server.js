@@ -1,7 +1,12 @@
 // Lightweight WebSocket server that keeps all data in memory.
 // This is intentionally simple to make the real-time flow easy to explain.
 
+// ts-node is used here so the Node server can load the shared TS schema file.
+// This keeps the WebSocket contract in one place for both server and client.
+require('ts-node/register');
+
 const { WebSocketServer } = require('ws');
+const { ClientMessageSchema, PROTOCOL_VERSION } = require('../src/shared/schema');
 
 const PORT = process.env.WS_PORT ? Number(process.env.WS_PORT) : 8080;
 const MAX_READINGS = 24;
@@ -39,6 +44,8 @@ const alarms = [
   { alarmId: 'alarm-310', code: 'HV-310', description: 'Boiler flame failure', legacyId: '310' },
   { alarmId: 'alarm-420', code: 'HV-420', description: 'BAS comms loss', legacyId: '420' }
 ];
+
+const INCIDENT_ID_PATTERN = /^[a-z0-9-]{3,32}$/i;
 
 // Seed incidents. Each incident contains a small history of readings.
 const incidents = [
@@ -136,11 +143,16 @@ const broadcast = message => {
   });
 };
 
+const sendError = (socket, code, message) => {
+  socket.send(JSON.stringify({ type: 'error', code, message }));
+};
+
 wss.on('connection', socket => {
   // On first connection, send everything the UI needs to render.
   socket.send(
     JSON.stringify({
       type: 'init',
+      protocolVersion: PROTOCOL_VERSION,
       incidents,
       catalog: {
         escalationLevels,
@@ -160,8 +172,20 @@ wss.on('connection', socket => {
       return;
     }
 
-    if (message?.type === 'addIncident' && message.incident) {
-      const incident = message.incident;
+    // Shared schema validation makes sure the server only accepts known message shapes.
+    const parsed = ClientMessageSchema.safeParse(message);
+    if (!parsed.success) {
+      sendError(socket, 'INVALID_MESSAGE', 'Message did not match the expected schema.');
+      return;
+    }
+
+    if (parsed.data.type === 'addIncident') {
+      const incident = parsed.data.incident;
+      // Backend validation prevents malformed IDs from entering shared state.
+      if (!INCIDENT_ID_PATTERN.test(String(incident.incidentId ?? ''))) {
+        sendError(socket, 'INVALID_INCIDENT_ID', 'Incident ID must be 3-32 characters: letters, numbers, or hyphens.');
+        return;
+      }
       const previousReading = incident.readings?.[incident.readings.length - 1];
       if (!incident.readings || incident.readings.length === 0) {
         incident.readings = [createReading(previousReading)];
@@ -170,8 +194,8 @@ wss.on('connection', socket => {
       broadcast({ type: 'incidentAdded', incident });
     }
 
-    if (message?.type === 'updateIncident' && message.incident) {
-      const incident = message.incident;
+    if (parsed.data.type === 'updateIncident') {
+      const incident = parsed.data.incident;
       const index = incidents.findIndex(item => item.incidentId === incident.incidentId);
       if (index >= 0) {
         incidents[index] = incident;
@@ -181,8 +205,8 @@ wss.on('connection', socket => {
       broadcast({ type: 'incidentUpdated', incident });
     }
 
-    if (message?.type === 'setReadingInterval' && Number.isFinite(message.intervalMs)) {
-      const nextInterval = Math.max(MIN_READING_INTERVAL_MS, Number(message.intervalMs));
+    if (parsed.data.type === 'setReadingInterval') {
+      const nextInterval = Math.max(MIN_READING_INTERVAL_MS, Number(parsed.data.intervalMs));
       readingIntervalMs = nextInterval;
       if (readingIntervalId) {
         clearInterval(readingIntervalId);

@@ -31,6 +31,7 @@ type IncidentDetailPageProps = {
   connectionStatus: ConnectionStatus;
   readingIntervalMs: number;
   setReadingIntervalMs: (value: number) => void;
+  lastError: string | null;
 };
 
 export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
@@ -39,6 +40,7 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
   connectionStatus,
   readingIntervalMs,
   setReadingIntervalMs,
+  lastError,
 }) => {
   // Precompute labels so JSX stays clean and readable.
   const detail = useMemo(() => {
@@ -74,6 +76,11 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
       </PageHeader>
 
       <ConnectionBanner status={connectionStatus} />
+      {lastError ? (
+        <div className="app-error" role="alert">
+          {lastError}
+        </div>
+      ) : null}
 
       {!incident || !detail ? (
         <p className="incident-detail__empty">Incident not found.</p>

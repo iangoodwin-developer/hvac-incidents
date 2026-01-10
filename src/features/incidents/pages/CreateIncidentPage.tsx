@@ -26,15 +26,20 @@ type CreateIncidentPageProps = {
   catalog: Catalog;
   connectionStatus: ConnectionStatus;
   sendIncident: (incident: Incident) => void;
+  lastError: string | null;
 };
+
+const isIncidentIdValid = (value: string) => /^[a-z0-9-]{3,32}$/i.test(value);
 
 export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
   catalog,
   connectionStatus,
   sendIncident,
+  lastError,
 }) => {
   // Form state lives locally so inputs remain controlled.
   const [formState, setFormState] = useState<IncidentFormState>(createEmptyForm());
+  const [incidentIdError, setIncidentIdError] = useState<string | null>(null);
 
   useEffect(() => {
     // Pre-fill dropdowns with the first catalog entries once data is loaded.
@@ -66,12 +71,27 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
       }
       return { ...prev, [field]: value };
     });
+
+    if (field === 'incidentId') {
+      // Frontend validation keeps obvious errors out before we send to the server.
+      const trimmed = value.trim();
+      setIncidentIdError(
+        trimmed && !isIncidentIdValid(trimmed)
+          ? 'Use 3-32 characters: letters, numbers, or hyphens.'
+          : null
+      );
+    }
   };
 
   const submitIncident = (event: React.FormEvent<HTMLFormElement>) => {
     // Build a new incident payload and send it through the WebSocket.
     event.preventDefault();
-    const incidentId = formState.incidentId.trim() || `inc-${Date.now()}`;
+    const trimmedId = formState.incidentId.trim();
+    if (trimmedId && !isIncidentIdValid(trimmedId)) {
+      setIncidentIdError('Use 3-32 characters: letters, numbers, or hyphens.');
+      return;
+    }
+    const incidentId = trimmedId || `inc-${Date.now()}`;
     const newIncident: Incident = {
       incidentId,
       siteId: formState.siteId,
@@ -94,6 +114,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
       priority: 1,
       occurrences: 1,
     }));
+    setIncidentIdError(null);
   };
 
   return (
@@ -105,6 +126,11 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
       </PageHeader>
 
       <ConnectionBanner status={connectionStatus} />
+      {lastError ? (
+        <div className="app-error" role="alert">
+          {lastError}
+        </div>
+      ) : null}
 
       <main className="create-page__content">
         <form onSubmit={submitIncident} className="create-page__form">
@@ -115,6 +141,11 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
               value={formState.incidentId}
               onChange={(event) => handleFormChange('incidentId', event.target.value)}
             />
+            {incidentIdError ? (
+              <span className="create-page__error" role="alert">
+                {incidentIdError}
+              </span>
+            ) : null}
           </label>
           <label className="create-page__field">
             <span className="create-page__label">Site</span>
