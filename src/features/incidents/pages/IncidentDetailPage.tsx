@@ -110,10 +110,6 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
                 <span className="incident-detail__value">{incident.priority}</span>
               </div>
               <div className="incident-detail__item">
-                <span className="incident-detail__label">Occurrences</span>
-                <span className="incident-detail__value">{incident.occurrences}</span>
-              </div>
-              <div className="incident-detail__item">
                 <span className="incident-detail__label">Status</span>
                 <span className="incident-detail__value">
                   <StatusPill status={incident.stateId} />

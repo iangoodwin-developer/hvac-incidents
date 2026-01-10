@@ -11,7 +11,6 @@ const buildIncident = (overrides: Partial<Incident>): Incident => ({
   assetId: overrides.assetId ?? 'asset-1',
   alarmId: overrides.alarmId ?? 'alarm-1',
   priority: overrides.priority ?? 1,
-  occurrences: overrides.occurrences ?? 1,
   createdAt: overrides.createdAt ?? new Date().toISOString(),
   stateId: overrides.stateId ?? INCIDENT_STATES.OPEN,
   escalationLevelId: overrides.escalationLevelId ?? 'esc-1',

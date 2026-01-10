@@ -1,7 +1,7 @@
 // Separate page for creating a new incident without the list filters.
 // This keeps the creation workflow focused and easy to demo.
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Catalog, Incident } from '../../../shared/types';
 import { INCIDENT_STATE_OPTIONS, INCIDENT_STATES, IncidentState } from '../../../shared/constants';
 import { ConnectionStatus } from '../hooks/useIncidentSocket';
@@ -14,7 +14,6 @@ const createEmptyForm = () => ({
   assetId: '',
   alarmId: '',
   priority: 1,
-  occurrences: 1,
   stateId: INCIDENT_STATES.OPEN as IncidentState,
   escalationLevelId: '',
   incidentTypeId: '',
@@ -41,6 +40,8 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
   const [formState, setFormState] = useState<IncidentFormState>(createEmptyForm());
   const [incidentIdError, setIncidentIdError] = useState<string | null>(null);
   const isSubmitDisabled = Boolean(incidentIdError);
+  const submitButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [isSubmitFloating, setIsSubmitFloating] = useState(false);
 
   useEffect(() => {
     // Pre-fill dropdowns with the first catalog entries once data is loaded.
@@ -64,10 +65,29 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
     }));
   }, [catalog]);
 
+  useEffect(() => {
+    // Show a floating submit button when the real one scrolls off-screen.
+    const button = submitButtonRef.current;
+    if (!button) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setIsSubmitFloating(!entry.isIntersecting);
+      },
+      { root: null, threshold: 0.1 }
+    );
+
+    observer.observe(button);
+    return () => observer.disconnect();
+  }, []);
+
   const handleFormChange = (field: keyof IncidentFormState, value: string) => {
     // Normalize numeric inputs so the incident payload is typed correctly.
     setFormState((prev) => {
-      if (field === 'priority' || field === 'occurrences') {
+      if (field === 'priority') {
         return { ...prev, [field]: Number(value) };
       }
       return { ...prev, [field]: value };
@@ -99,7 +119,6 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
       assetId: formState.assetId,
       alarmId: formState.alarmId,
       priority: formState.priority,
-      occurrences: formState.occurrences,
       createdAt: new Date().toISOString(),
       stateId: formState.stateId,
       escalationLevelId: formState.escalationLevelId,
@@ -113,7 +132,6 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
       ...prev,
       incidentId: '',
       priority: 1,
-      occurrences: 1,
     }));
     setIncidentIdError(null);
   };
@@ -200,15 +218,6 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
             />
           </label>
           <label className="create-page__field">
-            <span className="create-page__label">Occurrences</span>
-            <input
-              type="number"
-              min={1}
-              value={formState.occurrences}
-              onChange={(event) => handleFormChange('occurrences', event.target.value)}
-            />
-          </label>
-          <label className="create-page__field">
             <span className="create-page__label">State</span>
             <select
               value={formState.stateId}
@@ -248,6 +257,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
             </select>
           </label>
           <button
+            ref={submitButtonRef}
             type="submit"
             className="create-page__button"
             disabled={isSubmitDisabled}
@@ -257,6 +267,26 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
           </button>
         </form>
       </main>
+      <div
+        className={`create-page__floating-actions${
+          isSubmitFloating ? ' create-page__floating-actions--visible' : ''
+        }`}
+        aria-hidden={isSubmitFloating ? 'false' : 'true'}
+      >
+        <button
+          type="submit"
+          className="create-page__button create-page__button--floating"
+          disabled={isSubmitDisabled}
+          aria-disabled={isSubmitDisabled ? 'true' : 'false'}
+          onClick={(event) => {
+            if (isSubmitDisabled) {
+              event.preventDefault();
+            }
+          }}
+        >
+          Send incident
+        </button>
+      </div>
     </div>
   );
 };

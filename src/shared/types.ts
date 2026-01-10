@@ -28,7 +28,6 @@ export type Incident = {
   assetId: string;
   alarmId: string;
   priority: number;
-  occurrences: number;
   createdAt: string;
   updatedAt?: string;
   assignedTo?: string | null;

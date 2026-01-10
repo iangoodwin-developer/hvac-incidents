@@ -61,7 +61,6 @@ const IncidentRow = React.memo(
         <td>{siteName}</td>
         <td>{assetName}</td>
         <td>{alarmLabel}</td>
-        <td>{incident.occurrences}</td>
         <td>
           <StatusPill status={incident.stateId} />
         </td>
@@ -141,7 +140,6 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
                 <th>Site</th>
                 <th>Asset</th>
                 <th>Alarm</th>
-                <th>Occurrences</th>
                 <th>Status</th>
                 <th>Created</th>
                 <th>Move</th>

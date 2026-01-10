@@ -17,7 +17,6 @@ export const IncidentSchema = z.object({
   assetId: z.string(),
   alarmId: z.string(),
   priority: z.number(),
-  occurrences: z.number(),
   createdAt: z.string(),
   updatedAt: z.string().optional(),
   assignedTo: z.string().nullable().optional(),
