@@ -40,6 +40,7 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
   // Form state lives locally so inputs remain controlled.
   const [formState, setFormState] = useState<IncidentFormState>(createEmptyForm());
   const [incidentIdError, setIncidentIdError] = useState<string | null>(null);
+  const isSubmitDisabled = Boolean(incidentIdError);
 
   useEffect(() => {
     // Pre-fill dropdowns with the first catalog entries once data is loaded.
@@ -140,9 +141,11 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
               type="text"
               value={formState.incidentId}
               onChange={(event) => handleFormChange('incidentId', event.target.value)}
+              aria-invalid={incidentIdError ? 'true' : 'false'}
+              aria-describedby={incidentIdError ? 'incident-id-error' : undefined}
             />
             {incidentIdError ? (
-              <span className="create-page__error" role="alert">
+              <span id="incident-id-error" className="create-page__error" role="alert">
                 {incidentIdError}
               </span>
             ) : null}
@@ -244,7 +247,12 @@ export const CreateIncidentPage: React.FC<CreateIncidentPageProps> = ({
               ))}
             </select>
           </label>
-          <button type="submit" className="create-page__button">
+          <button
+            type="submit"
+            className="create-page__button"
+            disabled={isSubmitDisabled}
+            aria-disabled={isSubmitDisabled ? 'true' : 'false'}
+          >
             Send incident
           </button>
         </form>
