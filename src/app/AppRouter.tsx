@@ -27,20 +27,29 @@ type SharedRouteProps = {
   connectionStatus: ConnectionStatus;
 };
 
-const IncidentDetailRoute: React.FC<SharedRouteProps> = ({
-  incidents,
-  catalog,
-  connectionStatus,
-}) => {
+const IncidentDetailRoute: React.FC<
+  SharedRouteProps & {
+    readingIntervalMs: number;
+    setReadingIntervalMs: (value: number) => void;
+  }
+> = ({ incidents, catalog, connectionStatus, readingIntervalMs, setReadingIntervalMs }) => {
   const { incidentId } = useParams();
   const incident = incidents.find((item) => item.incidentId === incidentId);
   return (
-    <IncidentDetailPage incident={incident} catalog={catalog} connectionStatus={connectionStatus} />
+    <IncidentDetailPage
+      incident={incident}
+      catalog={catalog}
+      connectionStatus={connectionStatus}
+      readingIntervalMs={readingIntervalMs}
+      setReadingIntervalMs={setReadingIntervalMs}
+    />
   );
 };
 
 const IncidentsRoute: React.FC<
-  SharedRouteProps & { updateIncident: (incident: Incident) => void }
+  SharedRouteProps & {
+    updateIncident: (incident: Incident) => void;
+  }
 > = ({ incidents, catalog, connectionStatus, updateIncident }) => (
   <IncidentsPage
     incidents={incidents}
@@ -61,8 +70,15 @@ const CreateIncidentRoute: React.FC<
 );
 
 export const AppRouter: React.FC = () => {
-  const { incidents, catalog, connectionStatus, sendIncident, updateIncident } =
-    useIncidentSocket();
+  const {
+    incidents,
+    catalog,
+    connectionStatus,
+    sendIncident,
+    updateIncident,
+    readingIntervalMs,
+    setReadingIntervalMs,
+  } = useIncidentSocket();
 
   return (
     <HashRouter>
@@ -96,6 +112,8 @@ export const AppRouter: React.FC = () => {
                 incidents={incidents}
                 catalog={catalog}
                 connectionStatus={connectionStatus}
+                readingIntervalMs={readingIntervalMs}
+                setReadingIntervalMs={setReadingIntervalMs}
               />
             }
           />

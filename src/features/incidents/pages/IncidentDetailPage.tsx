@@ -29,12 +29,16 @@ type IncidentDetailPageProps = {
   incident?: Incident;
   catalog: Catalog;
   connectionStatus: ConnectionStatus;
+  readingIntervalMs: number;
+  setReadingIntervalMs: (value: number) => void;
 };
 
 export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
   incident,
   catalog,
   connectionStatus,
+  readingIntervalMs,
+  setReadingIntervalMs,
 }) => {
   // Precompute labels so JSX stays clean and readable.
   const detail = useMemo(() => {
@@ -55,6 +59,18 @@ export const IncidentDetailPage: React.FC<IncidentDetailPageProps> = ({
         <nav className="incident-detail__nav">
           <a href="#/">Back to incidents</a>
         </nav>
+        <label className="incident-detail__field">
+          <span className="incident-detail__label">Reading refresh</span>
+          <select
+            value={readingIntervalMs}
+            onChange={(event) => setReadingIntervalMs(Number(event.target.value))}
+          >
+            <option value={500}>0.5s</option>
+            <option value={1000}>1s</option>
+            <option value={2000}>2s</option>
+            <option value={5000}>5s</option>
+          </select>
+        </label>
       </PageHeader>
 
       <ConnectionBanner status={connectionStatus} />

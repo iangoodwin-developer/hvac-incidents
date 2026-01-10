@@ -5,7 +5,8 @@ const { WebSocketServer } = require('ws');
 
 const PORT = process.env.WS_PORT ? Number(process.env.WS_PORT) : 8080;
 const MAX_READINGS = 24;
-const READING_INTERVAL_MS = 2000;
+const DEFAULT_READING_INTERVAL_MS = 2000;
+const MIN_READING_INTERVAL_MS = 250;
 
 // Reference data (catalog) that the UI uses for labels and dropdowns.
 const escalationLevels = [
@@ -123,6 +124,8 @@ const seedReadings = () => {
 seedReadings();
 
 const wss = new WebSocketServer({ port: PORT });
+let readingIntervalMs = DEFAULT_READING_INTERVAL_MS;
+let readingIntervalId = null;
 
 const broadcast = message => {
   const payload = JSON.stringify(message);
@@ -177,19 +180,31 @@ wss.on('connection', socket => {
       }
       broadcast({ type: 'incidentUpdated', incident });
     }
+
+    if (message?.type === 'setReadingInterval' && Number.isFinite(message.intervalMs)) {
+      const nextInterval = Math.max(MIN_READING_INTERVAL_MS, Number(message.intervalMs));
+      readingIntervalMs = nextInterval;
+      if (readingIntervalId) {
+        clearInterval(readingIntervalId);
+      }
+      readingIntervalId = startReadingInterval();
+    }
   });
 });
 
+const startReadingInterval = () =>
+  setInterval(() => {
+    incidents.forEach(incident => {
+      const readings = incident.readings ?? [];
+      const previous = readings[readings.length - 1];
+      const nextReading = createReading(previous);
+      const nextReadings = [...readings, nextReading].slice(-MAX_READINGS);
+      incident.readings = nextReadings;
+      broadcast({ type: 'incidentUpdated', incident });
+    });
+  }, readingIntervalMs);
+
 // Push a new reading for every incident on a fixed interval to simulate live data.
-setInterval(() => {
-  incidents.forEach(incident => {
-    const readings = incident.readings ?? [];
-    const previous = readings[readings.length - 1];
-    const nextReading = createReading(previous);
-    const nextReadings = [...readings, nextReading].slice(-MAX_READINGS);
-    incident.readings = nextReadings;
-    broadcast({ type: 'incidentUpdated', incident });
-  });
-}, READING_INTERVAL_MS);
+readingIntervalId = startReadingInterval();
 
 console.log(`WebSocket server listening on ws://localhost:${PORT}`);

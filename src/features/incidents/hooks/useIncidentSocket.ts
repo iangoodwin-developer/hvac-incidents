@@ -1,7 +1,7 @@
 // Custom hook that owns the WebSocket connection and exposes
 // a small API for the rest of the app to consume.
 
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useReducer, useRef, useState } from 'react';
 import { Catalog, Incident } from '../../../shared/types';
 
 export type ConnectionStatus = 'connected' | 'disconnected';
@@ -50,7 +50,64 @@ export const useIncidentSocket = () => {
   const [incidents, dispatch] = useReducer(incidentsReducer, []);
   const [catalog, setCatalog] = useState<Catalog>(emptyCatalog);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
+  const [readingIntervalMs, setReadingIntervalMs] = useState(2000);
   const socketRef = useRef<WebSocket | null>(null);
+  const lastUpdateRef = useRef(0);
+
+  // useEffectEvent keeps the handler stable while reading fresh logic/state,
+  // like a user-controlled throttle that changes over time.
+  // The commented block in the effect shows the "plain useEffect closure" version.
+  const handleMessage = useEffectEvent((event: MessageEvent) => {
+    // Parse the message defensively so malformed payloads don't crash the app.
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(event.data);
+    } catch (error) {
+      return;
+    }
+
+    const payload = parsed as ServerPayload | undefined;
+    if (!payload || !payload.type) {
+      return;
+    }
+
+    if (payload.type === 'init') {
+      // Initial payload carries the full catalog and current incident list.
+      if (payload.incidents) {
+        dispatch({ type: 'init', incidents: payload.incidents });
+      }
+      if (payload.catalog) {
+        // Merge with defaults to avoid undefined fields while server restarts.
+        setCatalog({
+          ...emptyCatalog,
+          ...payload.catalog,
+        });
+      }
+    }
+
+    if (payload.type === 'incidentAdded') {
+      // Prepend the latest incident so the UI shows newest items first.
+      const incident = payload.incident;
+      if (!incident) {
+        return;
+      }
+      dispatch({ type: 'add', incident });
+    }
+
+    if (payload.type === 'incidentUpdated') {
+      // Merge updates into the existing list to keep row identity stable.
+      const incident = payload.incident;
+      if (!incident) {
+        return;
+      }
+      const now = Date.now();
+      if (now - lastUpdateRef.current < readingIntervalMs) {
+        return;
+      }
+      lastUpdateRef.current = now;
+      dispatch({ type: 'update', incident });
+    }
+  });
 
   useEffect(() => {
     // Establish a persistent WebSocket connection on mount.
@@ -65,6 +122,10 @@ export const useIncidentSocket = () => {
       setConnectionStatus('disconnected');
     });
 
+    socket.addEventListener('message', handleMessage);
+    // Old version (plain closure). Use this if you want the simpler, non-experimental pattern,
+    // but note it would capture the initial readingIntervalMs unless you add it to dependencies.
+    /*
     socket.addEventListener('message', (event) => {
       // Parse the message defensively so malformed payloads don't crash the app.
       let parsed: unknown;
@@ -108,14 +169,26 @@ export const useIncidentSocket = () => {
         if (!incident) {
           return;
         }
+        const now = Date.now();
+        if (now - lastUpdateRef.current < readingIntervalMs) {
+          return;
+        }
+        lastUpdateRef.current = now;
         dispatch({ type: 'update', incident });
       }
     });
+    */
 
     return () => {
       socket.close();
     };
   }, []);
+
+  useEffect(() => {
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({ type: 'setReadingInterval', intervalMs: readingIntervalMs }));
+    }
+  }, [readingIntervalMs]);
 
   // Send a brand-new incident to the server.
   const sendIncident = (incident: Incident) => {
@@ -137,6 +210,8 @@ export const useIncidentSocket = () => {
     incidents,
     catalog,
     connectionStatus,
+    readingIntervalMs,
+    setReadingIntervalMs,
     sendIncident,
     updateIncident,
   };
