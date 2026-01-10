@@ -2,7 +2,7 @@
 // a small API for the rest of the app to consume.
 
 import { useEffect, useReducer, useRef, useState } from 'react';
-import { Catalog, Incident } from '../types';
+import { Catalog, Incident } from '../../../shared/types';
 
 export type ConnectionStatus = 'connected' | 'disconnected';
 
@@ -11,7 +11,7 @@ const emptyCatalog: Catalog = {
   incidentTypes: [],
   sites: [],
   assets: [],
-  alarms: []
+  alarms: [],
 };
 
 type ServerPayload = {
@@ -36,11 +36,13 @@ const incidentsReducer = (state: Incident[], action: IncidentAction) => {
     return [action.incident, ...state];
   }
 
-  const exists = state.some(item => item.incidentId === action.incident.incidentId);
+  const exists = state.some((item) => item.incidentId === action.incident.incidentId);
   if (!exists) {
     return [action.incident, ...state];
   }
-  return state.map(item => (item.incidentId === action.incident.incidentId ? action.incident : item));
+  return state.map((item) =>
+    item.incidentId === action.incident.incidentId ? action.incident : item
+  );
 };
 
 export const useIncidentSocket = () => {
@@ -63,7 +65,7 @@ export const useIncidentSocket = () => {
       setConnectionStatus('disconnected');
     });
 
-    socket.addEventListener('message', event => {
+    socket.addEventListener('message', (event) => {
       // Parse the message defensively so malformed payloads don't crash the app.
       let parsed: unknown;
       try {
@@ -86,7 +88,7 @@ export const useIncidentSocket = () => {
           // Merge with defaults to avoid undefined fields while server restarts.
           setCatalog({
             ...emptyCatalog,
-            ...payload.catalog
+            ...payload.catalog,
           });
         }
       }
@@ -136,6 +138,6 @@ export const useIncidentSocket = () => {
     catalog,
     connectionStatus,
     sendIncident,
-    updateIncident
+    updateIncident,
   };
 };

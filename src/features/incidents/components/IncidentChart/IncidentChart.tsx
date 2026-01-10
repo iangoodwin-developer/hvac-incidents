@@ -1,15 +1,21 @@
-// Presentational chart component for a single incident's readings.
-// Uses simple div bars to avoid external charting dependencies.
+// Small, dependency-free chart for incident readings.
+// I kept it CSS-only so this demo stays lightweight.
 
 import React, { useMemo } from 'react';
-import { IncidentReading } from '../../types';
+import { IncidentReading } from '../../../../shared/types';
+import styles from './IncidentChart.scss'
+
 
 type IncidentChartProps = {
   readings: IncidentReading[];
 };
 
-// Calculate the latest value trend so we can color and label the UI.
-const getTrend = (readings: IncidentReading[], key: 'temperature' | 'pressure') => {
+const TREND_THRESHOLD = 0.2;
+
+const formatReading = (value: number) => value.toFixed(1);
+
+// Compare the last two readings to decide arrow + color.
+const getTrendSummary = (readings: IncidentReading[], key: 'temperature' | 'pressure') => {
   const last = readings[readings.length - 1];
   const previous = readings[readings.length - 2];
 
@@ -17,38 +23,37 @@ const getTrend = (readings: IncidentReading[], key: 'temperature' | 'pressure') 
     return { label: 'N/A', symbol: '-', status: 'steady' as const };
   }
   if (!previous) {
-    return { label: `${last[key].toFixed(1)}`, symbol: '-', status: 'steady' as const };
+    return { label: formatReading(last[key]), symbol: '-', status: 'steady' as const };
   }
 
   const delta = last[key] - previous[key];
-  if (delta > 0.2) {
-    return { label: `${last[key].toFixed(1)}`, symbol: '^', status: 'rising' as const };
+  if (delta > TREND_THRESHOLD) {
+    return { label: formatReading(last[key]), symbol: '^', status: 'rising' as const };
   }
-  if (delta < -0.2) {
-    return { label: `${last[key].toFixed(1)}`, symbol: 'v', status: 'falling' as const };
+  if (delta < -TREND_THRESHOLD) {
+    return { label: formatReading(last[key]), symbol: 'v', status: 'falling' as const };
   }
 
-  return { label: `${last[key].toFixed(1)}`, symbol: '-', status: 'steady' as const };
+  return { label: formatReading(last[key]), symbol: '-', status: 'steady' as const };
 };
 
 export const IncidentChart: React.FC<IncidentChartProps> = ({ readings }) => {
-  // Compute trend state once per render.
-  const temperatureTrend = getTrend(readings, 'temperature');
-  const pressureTrend = getTrend(readings, 'pressure');
+  const temperatureTrend = getTrendSummary(readings, 'temperature');
+  const pressureTrend = getTrendSummary(readings, 'pressure');
 
   const temperatureBars = useMemo(() => {
     // Normalize bar heights so the visual scale adjusts to the data range.
     if (readings.length === 0) {
       return [];
     }
-    const values = readings.map(item => item.temperature);
+    const values = readings.map((item) => item.temperature);
     const min = Math.min(...values);
     const max = Math.max(...values);
     const range = Math.max(max - min, 1);
 
-    return readings.map(item => ({
+    return readings.map((item) => ({
       id: item.timestamp,
-      height: ((item.temperature - min) / range) * 100
+      height: ((item.temperature - min) / range) * 100,
     }));
   }, [readings]);
 
@@ -56,19 +61,19 @@ export const IncidentChart: React.FC<IncidentChartProps> = ({ readings }) => {
     if (readings.length === 0) {
       return [];
     }
-    const values = readings.map(item => item.pressure);
+    const values = readings.map((item) => item.pressure);
     const min = Math.min(...values);
     const max = Math.max(...values);
     const range = Math.max(max - min, 1);
 
-    return readings.map(item => ({
+    return readings.map((item) => ({
       id: item.timestamp,
-      height: ((item.pressure - min) / range) * 100
+      height: ((item.pressure - min) / range) * 100,
     }));
   }, [readings]);
 
   return (
-    <section className='incident-chart'>
+    <section className={styles.incidentChart}>
       <header className='incident-chart__header'>
         <div>
           <h3 className='incident-chart__title'>Live readings</h3>
@@ -77,14 +82,18 @@ export const IncidentChart: React.FC<IncidentChartProps> = ({ readings }) => {
         <div className='incident-chart__values'>
           <div className='incident-chart__value'>
             <span className='incident-chart__value-label'>Temp</span>
-            <span className={`incident-chart__value-number incident-chart__value-number--${temperatureTrend.status}`}>
+            <span
+              className={`incident-chart__value-number incident-chart__value-number--${temperatureTrend.status}`}
+            >
               {temperatureTrend.label} F
             </span>
             <span className='incident-chart__value-arrow'>{temperatureTrend.symbol}</span>
           </div>
           <div className='incident-chart__value'>
             <span className='incident-chart__value-label'>Pressure</span>
-            <span className={`incident-chart__value-number incident-chart__value-number--${pressureTrend.status}`}>
+            <span
+              className={`incident-chart__value-number incident-chart__value-number--${pressureTrend.status}`}
+            >
               {pressureTrend.label} psi
             </span>
             <span className='incident-chart__value-arrow'>{pressureTrend.symbol}</span>
@@ -106,13 +115,21 @@ export const IncidentChart: React.FC<IncidentChartProps> = ({ readings }) => {
             </span>
           </div>
           <div className='incident-chart__bars'>
-            {temperatureBars.map(bar => (
-              <div key={bar.id} className='incident-chart__bar incident-chart__bar--temp' style={{ height: `${bar.height}%` }} />
+            {temperatureBars.map((bar) => (
+              <div
+                key={bar.id}
+                className='incident-chart__bar incident-chart__bar--temp'
+                style={{ height: `${bar.height}%` }}
+              />
             ))}
           </div>
           <div className='incident-chart__bars'>
-            {pressureBars.map(bar => (
-              <div key={bar.id} className='incident-chart__bar incident-chart__bar--pressure' style={{ height: `${bar.height}%` }} />
+            {pressureBars.map((bar) => (
+              <div
+                key={bar.id}
+                className='incident-chart__bar incident-chart__bar--pressure'
+                style={{ height: `${bar.height}%` }}
+              />
             ))}
           </div>
         </div>

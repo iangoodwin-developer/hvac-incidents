@@ -1,13 +1,13 @@
 /*
   Global layout styles and page-level blocks.
-  Component-specific styles live in the stylingComponents folders.
+  Component-specific styles live in shared and feature folders.
 */
 
-@import './stylingComponents/PageHeader/PageHeader.scss';
-@import './stylingComponents/IncidentsSection/IncidentsSection.scss';
-@import './stylingComponents/IncidentChart/IncidentChart.scss';
-@import './stylingComponents/ConnectionBanner/ConnectionBanner.scss';
-@import './stylingComponents/StatusPill/StatusPill.scss';
+@import '../shared/components/PageHeader/PageHeader.scss';
+@import '../features/incidents/components/IncidentsSection/IncidentsSection.scss';
+@import '../features/incidents/components/IncidentChart/IncidentChart.scss';
+@import '../shared/components/ConnectionBanner/ConnectionBanner.scss';
+@import '../features/incidents/components/StatusPill/StatusPill.scss';
 
 .app {
   min-height: 100vh;
@@ -15,6 +15,11 @@
   background: #f6f7f9;
   color: #1f2933;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app__loading {
+  margin: 0 0 1rem;
+  color: #52606d;
 }
 
 /* Incidents list page styles */

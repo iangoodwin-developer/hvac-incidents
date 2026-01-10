@@ -1,8 +1,8 @@
 // Pure filtering helpers for incidents.
 // Keeping this logic isolated makes it easy to test and reuse.
 
-import { INCIDENT_STATES } from '../constants';
-import { Incident } from '../types';
+import { INCIDENT_STATES } from '../../../shared/constants';
+import { Incident } from '../../../shared/types';
 
 export type IncidentBucket = 'new' | 'active' | 'completed';
 
@@ -20,7 +20,7 @@ export const getIncidentsByType = (
     }
     if (incidentTypeIds?.length) {
       const incidentTypes = incident.incidentTypeIds ?? [];
-      const matchesIncidentType = incidentTypeIds.some(typeId => incidentTypes.includes(typeId));
+      const matchesIncidentType = incidentTypeIds.some((typeId) => incidentTypes.includes(typeId));
       if (!matchesIncidentType) {
         return false;
       }
@@ -28,7 +28,7 @@ export const getIncidentsByType = (
     return true;
   };
 
-  return incidents.filter(incident => {
+  return incidents.filter((incident) => {
     if (!matchesFilter(incident)) {
       return false;
     }

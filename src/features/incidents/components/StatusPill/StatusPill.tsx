@@ -8,7 +8,5 @@ type StatusPillProps = {
 
 export const StatusPill: React.FC<StatusPillProps> = ({ status }) => {
   const normalized = status.toLowerCase();
-  return (
-    <span className={`status-pill status-pill--${normalized}`}>{status}</span>
-  );
+  return <span className={`status-pill status-pill--${normalized}`}>{status}</span>;
 };

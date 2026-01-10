@@ -3,12 +3,12 @@
 
 export const INCIDENT_STATES = {
   OPEN: 'OPEN',
-  CLOSED: 'CLOSED'
+  CLOSED: 'CLOSED',
 } as const;
 
-export type IncidentState = typeof INCIDENT_STATES[keyof typeof INCIDENT_STATES];
+export type IncidentState = (typeof INCIDENT_STATES)[keyof typeof INCIDENT_STATES];
 
 export const INCIDENT_STATE_OPTIONS: { id: IncidentState; label: string }[] = [
   { id: INCIDENT_STATES.OPEN, label: 'Open' },
-  { id: INCIDENT_STATES.CLOSED, label: 'Closed' }
+  { id: INCIDENT_STATES.CLOSED, label: 'Closed' },
 ];

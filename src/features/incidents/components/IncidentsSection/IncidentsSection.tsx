@@ -2,7 +2,7 @@
 // It stays stateless by receiving handlers from the incidents page.
 
 import React, { useMemo, useState } from 'react';
-import { Alarm, Asset, Incident, Site } from '../../types';
+import { Alarm, Asset, Incident, Site } from '../../../../shared/types';
 import { StatusPill } from '../StatusPill/StatusPill';
 
 const formatTimestamp = (isoString: string) => {
@@ -30,7 +30,7 @@ const IncidentRow = React.memo(
     alarmLabel,
     onDragStart,
     actions,
-    onMoveIncident
+    onMoveIncident,
   }: {
     incident: Incident;
     siteName: string;
@@ -41,11 +41,7 @@ const IncidentRow = React.memo(
     onMoveIncident: (incidentId: string, target: 'new' | 'active' | 'completed') => void;
   }) => {
     return (
-      <tr
-        draggable
-        onDragStart={onDragStart}
-        className='incidents-section__row'
-      >
+      <tr draggable onDragStart={onDragStart} className="incidents-section__row">
         <td>{incident.priority}</td>
         <td>{siteName}</td>
         <td>{assetName}</td>
@@ -55,19 +51,19 @@ const IncidentRow = React.memo(
           <StatusPill status={incident.stateId} />
         </td>
         <td>{formatTimestamp(incident.createdAt)}</td>
-        <td className='incidents-section__actions'>
+        <td className="incidents-section__actions">
           <a
-            className='incidents-section__link'
+            className="incidents-section__link"
             href={`#/incident/${incident.incidentId}`}
             aria-label={`View details for incident ${incident.incidentId}`}
           >
             View
           </a>
-          {actions.map(action => (
+          {actions.map((action) => (
             <button
               key={action.label}
-              type='button'
-              className='incidents-section__action'
+              type="button"
+              className="incidents-section__action"
               aria-label={`${action.label} for incident ${incident.incidentId}`}
               onClick={() => onMoveIncident(incident.incidentId, action.target)}
             >
@@ -89,16 +85,19 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
   onDropIncident,
   onDragStart,
   onMoveIncident,
-  actions
+  actions,
 }) => {
   // Build lookup maps so we avoid repeated array searches while rendering rows.
-  const siteMap = useMemo(() => new Map(sites.map(site => [site.id, site])), [sites]);
-  const assetMap = useMemo(() => new Map(assets.map(asset => [asset.id, asset])), [assets]);
-  const alarmMap = useMemo(() => new Map(alarms.map(alarm => [alarm.alarmId, alarm])), [alarms]);
+  const siteMap = useMemo(() => new Map(sites.map((site) => [site.id, site])), [sites]);
+  const assetMap = useMemo(() => new Map(assets.map((asset) => [asset.id, asset])), [assets]);
+  const alarmMap = useMemo(() => new Map(alarms.map((alarm) => [alarm.alarmId, alarm])), [alarms]);
   const [visibleCount, setVisibleCount] = useState(25);
 
   // Window the rows to keep rendering snappy with large datasets.
-  const visibleIncidents = useMemo(() => incidents.slice(0, visibleCount), [incidents, visibleCount]);
+  const visibleIncidents = useMemo(
+    () => incidents.slice(0, visibleCount),
+    [incidents, visibleCount]
+  );
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     // Read the incident id from the drag payload and forward it to the parent.
@@ -111,17 +110,17 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
 
   return (
     <section
-      className='incidents-section'
-      onDragOver={event => event.preventDefault()}
+      className="incidents-section"
+      onDragOver={(event) => event.preventDefault()}
       onDrop={handleDrop}
     >
-      <h2 className='incidents-section__title'>{title}</h2>
+      <h2 className="incidents-section__title">{title}</h2>
       {incidents.length === 0 ? (
-        <p className='incidents-section__empty'>No incidents found.</p>
+        <p className="incidents-section__empty">No incidents found.</p>
       ) : (
         <div
-          className='incidents-section__table'
-          onDragOver={event => event.preventDefault()}
+          className="incidents-section__table"
+          onDragOver={(event) => event.preventDefault()}
           onDrop={handleDrop}
         >
           <table>
@@ -138,7 +137,7 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
               </tr>
             </thead>
             <tbody>
-              {visibleIncidents.map(incident => {
+              {visibleIncidents.map((incident) => {
                 const site = siteMap.get(incident.siteId);
                 const asset = assetMap.get(incident.assetId);
                 const alarm = alarmMap.get(incident.alarmId);
@@ -151,7 +150,7 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
                     siteName={site?.name ?? 'Unknown'}
                     assetName={asset?.displayName ?? 'Unknown'}
                     alarmLabel={alarmLabel}
-                    onDragStart={event => onDragStart(incident.incidentId, event)}
+                    onDragStart={(event) => onDragStart(incident.incidentId, event)}
                     actions={actions}
                     onMoveIncident={onMoveIncident}
                   />
@@ -163,14 +162,14 @@ export const IncidentsSection: React.FC<IncidentsSectionProps> = ({
       )}
       {incidents.length > visibleCount ? (
         <button
-          type='button'
-          className='incidents-section__show-more'
-          onClick={() => setVisibleCount(prev => prev + 25)}
+          type="button"
+          className="incidents-section__show-more"
+          onClick={() => setVisibleCount((prev) => prev + 25)}
         >
           Show more
         </button>
       ) : null}
-      <p className='incidents-section__hint'>Drag incidents into another list to change status.</p>
+      <p className="incidents-section__hint">Drag incidents into another list to change status.</p>
     </section>
   );
 };

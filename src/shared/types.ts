@@ -5,7 +5,13 @@
 export type EscalationLevel = { id: string; name: string };
 export type IncidentType = { id: string; name: string };
 export type Site = { id: string; name: string };
-export type Asset = { id: string; siteId: string; displayName: string; model: string; regionName: string };
+export type Asset = {
+  id: string;
+  siteId: string;
+  displayName: string;
+  model: string;
+  regionName: string;
+};
 export type Alarm = { alarmId: string; code: string; description: string; legacyId?: string };
 
 // A single time-series data point for an incident.
